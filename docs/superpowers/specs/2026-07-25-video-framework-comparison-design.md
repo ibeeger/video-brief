@@ -14,7 +14,8 @@
 | 产出 | 位置 | 说明 |
 |---|---|---|
 | 三支成品视频 | `output/remotion.mp4`、`output/hyperframes.mp4`、`output/motion-canvas.mp4` | 1920×1080、30fps、约 30 秒，内容一致 |
-| 统一分镜脚本 | `docs/storyboard.md` | 文案、时间轴、视觉规范的唯一依据 |
+| 统一分镜脚本 | `docs/storyboard.md` | 文案、旁白话术、时间轴、视觉规范的唯一依据 |
+| 旁白音轨 | `assets/voiceover.mp3`（及分句素材 `assets/tts/`） | edge-tts 生成，三支视频共用同一条音轨 |
 | 对比报告 | `docs/report.md` | 主观评价 + 客观数据 |
 | 基准测试脚本 | `scripts/benchmark.mjs` | 统一计时与产物统计 |
 
@@ -31,13 +32,25 @@
 | 22–28s | 对比环节 | 三列对比表逐行点亮 + 评分条动画 |
 | 28–30s | 结语 | 「没有最好，只有最合适」+ 三者适用场景一句话 |
 
-逐句文案、色值、字体、动效曲线在实现阶段先写入 `docs/storyboard.md`，三个实现严格照此执行，保证公平。
+逐句文案、旁白话术、色值、字体、动效曲线在实现阶段先写入 `docs/storyboard.md`，三个实现严格照此执行，保证公平。
+
+## 3.1 旁白配音（edge-tts）
+
+- 每个场景配一句旁白话术，写入 `docs/storyboard.md` 并标注目标时间窗。
+- 用 **edge-tts**（音色 `zh-CN-YunjianNeural`）逐句生成音频到 `assets/tts/`；若某句超出场景时长，通过 `--rate` 微调语速或精简话术。
+- 用 ffmpeg 按分镜时间轴拼装成整条 `assets/voiceover.mp3`（30 秒，句间以静音填充对齐场景起点），并用 `ffprobe` 校验每句起点误差 ≤ 0.2s。
+- **三支视频共用这一条音轨**，保证音画同步且对比公平；混入方式优先用各框架原生音频能力（Remotion `<Audio>`、Motion Canvas 项目音频、HyperFrames voiceover/audio），原生能力不可用时降级为 ffmpeg 后期混流，并在报告中如实记录——音频支持度本身就是对比维度之一。
+- edge-tts 为 Python 工具，安装在**项目内** `.venv/`（`python3 -m venv .venv && .venv/bin/pip install edge-tts`），不写 home 目录；生成时需要联网（微软 TTS 服务）。
 
 ## 4. 项目结构
 
 ```
 aigenVideo/
 ├─ .claude/           # 项目级权限 settings.json + skills（不写 home 目录）
+├─ assets/
+│  ├─ tts/            # edge-tts 逐句生成的音频
+│  └─ voiceover.mp3   # 拼装后的整条旁白音轨
+├─ .venv/             # 项目内 Python 环境（edge-tts）
 ├─ docs/
 │  ├─ storyboard.md
 │  ├─ report.md
@@ -55,7 +68,7 @@ aigenVideo/
 
 ## 5. 权限与 skills 约束
 
-- 所有权限白名单写入项目 `.claude/settings.json`（npm / npx / node / ffmpeg / ffprobe 等）。
+- 所有权限白名单写入项目 `.claude/settings.json`（npm / npx / node / ffmpeg / ffprobe / .venv/bin/edge-tts 等）。
 - HyperFrames 官方 agent skills（`npx skills add heygen-com/hyperframes`）安装到项目 `.claude/skills/`。
 - 任何配置、skill、缓存**不得写入用户 home 目录**。
 - 根目录 CLAUDE.md 记录三个子项目的常用命令（预览、渲染、基准测试）。
@@ -76,17 +89,18 @@ aigenVideo/
 - 学习曲线
 - 渲染性能（耗时、内存、产物体积 —— 引用 benchmark 数据）
 - 成品质量（视觉还原度、文字渲染、动效流畅度）
-- 生态与扩展（音频、图表、AI Agent 友好度）
+- 生态与扩展（原生音频/配音支持度、图表、AI Agent 友好度）
 - 适用场景结论
 
 ## 8. 验证方式
 
-- 每支视频渲染后 `ffprobe` 校验：时长 30s±0.5s、1920×1080、30fps。
-- 人工预览三支视频确认视觉一致性与质量。
+- 每支视频渲染后 `ffprobe` 校验：时长 30s±0.5s、1920×1080、30fps、含音频流。
+- 抽查关键场景切换点，确认旁白句起点与画面场景起点对齐（误差 ≤ 0.2s）。
+- 人工预览三支视频确认视觉一致性、音画同步与质量。
 - benchmark 跑通且数据写入报告后视为完成。
 
 ## 9. 明确不做（YAGNI）
 
-- 不做配音/TTS，音频仅可选 BGM（如加 BGM 三支视频用同一音轨）。
+- 不做 BGM/音效，音频仅旁白一条音轨；不做字幕烧录（画面文字已承担信息）。
 - 不做多分辨率输出、不做 CI、不做部署。
 - 不逐帧像素级对齐三支视频，允许框架惯用表达的合理差异，但分镜、文案、配色、时间轴必须一致。
