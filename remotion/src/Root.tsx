@@ -1,5 +1,6 @@
-import {Composition, AbsoluteFill} from 'remotion';
-const Placeholder = () => <AbsoluteFill style={{backgroundColor: '#0B0D12'}} />;
+import {Composition} from 'remotion';
+import {CompareVideo} from './scenes';
+
 export const Root = () => (
-  <Composition id="Compare" component={Placeholder} durationInFrames={900} fps={30} width={1920} height={1080} />
+  <Composition id="Compare" component={CompareVideo} durationInFrames={900} fps={30} width={1920} height={1080} />
 );
