@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm:*)", "Bash(npx:*)", "Bash(node:*)",
+      "Bash(ffmpeg:*)", "Bash(ffprobe:*)",
+      "Bash(python3:*)", "Bash(.venv/bin/edge-tts:*)", "Bash(.venv/bin/pip:*)",
+      "Bash(git:*)", "Bash(/usr/bin/time:*)"
+    ]
+  }
+}
