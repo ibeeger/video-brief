@@ -3,3 +3,4 @@ node_modules/
 .venv/
 output/*.mp4
 .superpowers/
+.npm-cache/

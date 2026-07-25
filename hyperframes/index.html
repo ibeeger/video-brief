@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="zh-CN" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>三框架对比 — HyperFrames</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "PingFang SC";
+        src: local("PingFang SC");
+      }
+      @font-face {
+        font-family: "Menlo";
+        src: local("Menlo");
+      }
+      :root {
+        --bg: #0b0d12;
+        --panel: #141926;
+        --text: #f2f4f8;
+        --muted: #8b93a7;
+        --remotion: #3b82f6;
+        --hyperframes: #f97316;
+        --motioncanvas: #10b981;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #000;
+      }
+      body {
+        font-family: "PingFang SC", system-ui, sans-serif;
+        color: var(--text);
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      .full-bleed {
+        position: absolute;
+        inset: 0;
+        background: var(--bg);
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+      }
+      .scene-inner {
+        position: absolute;
+        inset: 0;
+      }
+      .mono {
+        font-family: Menlo, monospace;
+      }
+
+      /* Feature card */
+      .card {
+        width: 500px;
+        height: 180px;
+        background: var(--panel);
+        border-radius: 16px;
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+          0 24px 48px -24px rgba(0, 0, 0, 0.65);
+        padding: 32px 36px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .card .kw {
+        font-size: 30px;
+        font-weight: 700;
+        margin-bottom: 14px;
+      }
+      .card .desc {
+        font-size: 22px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      /* S1 intro */
+      #s1 .inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
+      #s1 .line {
+        display: block;
+        width: 640px;
+        height: 2px;
+        background: var(--muted);
+        transform-origin: center;
+        margin-bottom: 56px;
+      }
+      #s1 h1 {
+        font-size: 72px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 40px;
+        max-width: 1600px;
+        text-align: center;
+      }
+      #s1 .names {
+        display: flex;
+        align-items: center;
+        gap: 56px;
+      }
+      #s1 .names span {
+        display: inline-block;
+        font-size: 32px;
+        font-weight: 700;
+      }
+
+      /* S2/S3/S4 chapter shared layout */
+      .chapter .bar-wrap {
+        position: absolute;
+        top: 160px;
+        left: 160px;
+        display: flex;
+        align-items: center;
+        height: 72px;
+      }
+      .chapter .bar {
+        display: block;
+        width: 6px;
+        height: 72px;
+        border-radius: 3px;
+        transform-origin: top;
+      }
+      .chapter .no {
+        margin-left: 20px;
+        font-size: 26px;
+        color: var(--muted);
+        letter-spacing: 2px;
+      }
+      .chapter .title {
+        position: absolute;
+        top: 272px;
+        left: 160px;
+        font-size: 72px;
+        font-weight: 700;
+        max-width: 1600px;
+      }
+      .chapter .sub {
+        position: absolute;
+        top: 366px;
+        left: 160px;
+        font-size: 32px;
+        color: var(--muted);
+        max-width: 1600px;
+      }
+      .chapter .cards {
+        position: absolute;
+        top: 560px;
+        left: 160px;
+        display: flex;
+        gap: 50px;
+      }
+
+      /* S5 comparison */
+      #s5 .title {
+        position: absolute;
+        top: 160px;
+        left: 160px;
+        right: 160px;
+        font-size: 56px;
+        font-weight: 700;
+        text-align: center;
+      }
+      #s5 .head {
+        position: absolute;
+        top: 300px;
+        left: 160px;
+        width: 1600px;
+        display: grid;
+        grid-template-columns: 320px repeat(3, 1fr);
+        align-items: center;
+      }
+      #s5 .head div {
+        font-size: 32px;
+        font-weight: 700;
+        text-align: center;
+      }
+      #s5 .row {
+        position: absolute;
+        left: 160px;
+        width: 1600px;
+        display: grid;
+        grid-template-columns: 320px repeat(3, 1fr);
+        align-items: center;
+      }
+      #s5 .row .label {
+        display: block;
+        font-size: 24px;
+        color: var(--text);
+      }
+      #s5 .barcell {
+        display: flex;
+        justify-content: center;
+      }
+      #s5 .bartrack {
+        width: 320px;
+        height: 14px;
+        border-radius: 7px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+      }
+      #s5 .barfill {
+        display: block;
+        width: 320px;
+        height: 14px;
+        border-radius: 7px;
+        transform-origin: left;
+        transform: scaleX(0);
+      }
+
+      /* S6 outro */
+      #s6 .inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
+      #s6 .main {
+        font-size: 56px;
+        font-weight: 700;
+        margin-bottom: 28px;
+        max-width: 1600px;
+        text-align: center;
+      }
+      #s6 .sub {
+        font-size: 22px;
+        color: var(--muted);
+        max-width: 1600px;
+        text-align: center;
+      }
+      #s6 .blackout {
+        position: absolute;
+        inset: 0;
+        background: #000;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-width="1920"
+      data-height="1080"
+      data-duration="30"
+      data-fps="30"
+    >
+      <!-- Shared background — not a clip, spans the whole composition -->
+      <div id="bg" class="full-bleed"></div>
+
+      <!-- S1 片头 0-4s -->
+      <section id="s1" class="clip" data-start="0" data-duration="4" data-track-index="1">
+        <div class="scene-inner">
+          <div class="inner">
+            <span id="s1-line" class="line"></span>
+            <h1 id="s1-title">程序化视频，三种答案</h1>
+            <div class="names">
+              <span id="s1-n-remotion" style="color: var(--remotion)">Remotion</span>
+              <span id="s1-n-hyperframes" style="color: var(--hyperframes)">HyperFrames</span>
+              <span id="s1-n-motioncanvas" style="color: var(--motioncanvas)">Motion Canvas</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- S2 Remotion 4-10s -->
+      <section id="s2" class="clip chapter" data-start="4" data-duration="6" data-track-index="1">
+        <div class="scene-inner">
+          <div class="bar-wrap">
+            <span id="s2-bar" class="bar" style="background: var(--remotion)"></span>
+            <span id="s2-no" class="no mono">01</span>
+          </div>
+          <h2 id="s2-title" class="title">Remotion</h2>
+          <div id="s2-sub" class="sub">React 生态的视频引擎</div>
+          <div class="cards">
+            <div id="s2-c1" class="card">
+              <div class="kw" style="color: var(--remotion)">组件即镜头</div>
+              <div class="desc">每一帧都是组件的纯函数输出</div>
+            </div>
+            <div id="s2-c2" class="card">
+              <div class="kw" style="color: var(--remotion)">useCurrentFrame</div>
+              <div class="desc">以帧为一等公民的时间模型</div>
+            </div>
+            <div id="s2-c3" class="card">
+              <div class="kw" style="color: var(--remotion)">工程化生态</div>
+              <div class="desc">Studio 预览 · Lambda 云渲染 · npm 生态</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- S3 HyperFrames 10-16s -->
+      <section id="s3" class="clip chapter" data-start="10" data-duration="6" data-track-index="1">
+        <div class="scene-inner">
+          <div class="bar-wrap">
+            <span id="s3-bar" class="bar" style="background: var(--hyperframes)"></span>
+            <span id="s3-no" class="no mono">02</span>
+          </div>
+          <h2 id="s3-title" class="title">HyperFrames</h2>
+          <div id="s3-sub" class="sub">写 HTML，渲染视频</div>
+          <div class="cards">
+            <div id="s3-c1" class="card">
+              <div class="kw" style="color: var(--hyperframes)">HTML 即分镜</div>
+              <div class="desc">浏览器渲染，逐帧捕获成片</div>
+            </div>
+            <div id="s3-c2" class="card">
+              <div class="kw" style="color: var(--hyperframes)">GSAP 时间线</div>
+              <div class="desc">成熟动画栈直接复用</div>
+            </div>
+            <div id="s3-c3" class="card">
+              <div class="kw" style="color: var(--hyperframes)">为 Agent 而生</div>
+              <div class="desc">轻量管线，AI 生成友好</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- S4 Motion Canvas 16-22s -->
+      <section id="s4" class="clip chapter" data-start="16" data-duration="6" data-track-index="1">
+        <div class="scene-inner">
+          <div class="bar-wrap">
+            <span id="s4-bar" class="bar" style="background: var(--motioncanvas)"></span>
+            <span id="s4-no" class="no mono">03</span>
+          </div>
+          <h2 id="s4-title" class="title">Motion Canvas</h2>
+          <div id="s4-sub" class="sub">生成器驱动的动画流</div>
+          <div class="cards">
+            <div id="s4-c1" class="card">
+              <div class="kw" style="color: var(--motioncanvas)">yield* 即时间</div>
+              <div class="desc">用生成器顺序描述动画</div>
+            </div>
+            <div id="s4-c2" class="card">
+              <div class="kw" style="color: var(--motioncanvas)">实时编辑器</div>
+              <div class="desc">时间线拖拽，所见即所得</div>
+            </div>
+            <div id="s4-c3" class="card">
+              <div class="kw" style="color: var(--motioncanvas)">教学利器</div>
+              <div class="desc">代码与图形演示的天然选择</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- S5 对比 22-28s -->
+      <section id="s5" class="clip" data-start="22" data-duration="6" data-track-index="1">
+        <div class="scene-inner">
+          <h2 id="s5-title" class="title">同题对比</h2>
+          <div id="s5-head" class="head">
+            <div></div>
+            <div style="color: var(--remotion)">Remotion</div>
+            <div style="color: var(--hyperframes)">HyperFrames</div>
+            <div style="color: var(--motioncanvas)">Motion Canvas</div>
+          </div>
+
+          <div id="s5-row0" class="row" style="top: 420px">
+            <div class="label">上手成本(满=易)</div>
+            <div class="barcell">
+              <div class="bartrack">
+                <div class="barfill" data-score="3" style="background: var(--remotion)"></div>
+              </div>
+            </div>
+            <div class="barcell">
+              <div class="bartrack">
+                <div class="barfill" data-score="5" style="background: var(--hyperframes)"></div>
+              </div>
+            </div>
+            <div class="barcell">
+              <div class="bartrack">
+                <div class="barfill" data-score="3" style="background: var(--motioncanvas)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="s5-row1" class="row" style="top: 530px">
+            <div class="label">生态成熟度</div>
+            <div class="barcell">
+              <div class="bartrack">
+                <div class="barfill" data-score="5" style="background: var(--remotion)"></div>
+              </div>
+            </div>
+            <div class="barcell">
+              <div class="bartrack">
+                <div class="barfill" data-score="2" style="background: var(--hyperframes)"></div>
+              </div>
+            </div>
+            <div class="barcell">
+              <div class="bartrack">
+                <div class="barfill" data-score="3" style="background: var(--motioncanvas)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="s5-row2" class="row" style="top: 640px">
+            <div class="label">渲染速度</div>
+            <div class="barcell">
+              <div class="bartrack">
+                <div class="barfill" data-score="3" style="background: var(--remotion)"></div>
+              </div>
+            </div>
+            <div class="barcell">
+              <div class="bartrack">
+                <div class="barfill" data-score="4" style="background: var(--hyperframes)"></div>
+              </div>
+            </div>
+            <div class="barcell">
+              <div class="bartrack">
+                <div class="barfill" data-score="4" style="background: var(--motioncanvas)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="s5-row3" class="row" style="top: 750px">
+            <div class="label">Agent 友好度</div>
+            <div class="barcell">
+              <div class="bartrack">
+                <div class="barfill" data-score="4" style="background: var(--remotion)"></div>
+              </div>
+            </div>
+            <div class="barcell">
+              <div class="bartrack">
+                <div class="barfill" data-score="5" style="background: var(--hyperframes)"></div>
+              </div>
+            </div>
+            <div class="barcell">
+              <div class="bartrack">
+                <div class="barfill" data-score="3" style="background: var(--motioncanvas)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- S6 结语 28-30s -->
+      <section id="s6" class="clip" data-start="28" data-duration="2" data-track-index="1">
+        <div class="scene-inner">
+          <div class="inner">
+            <div id="s6-main" class="main">没有最好，只有最合适</div>
+            <div id="s6-sub" class="sub">工程团队选 Remotion · Agent 管线选 HyperFrames · 教学演示选 Motion Canvas</div>
+          </div>
+          <div id="s6-black" class="blackout"></div>
+        </div>
+      </section>
+
+      <!-- 旁白音轨，独立音频轨道 -->
+      <audio id="voiceover" src="assets/voiceover.mp3" data-start="0" data-duration="30" data-track-index="10"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+      // ---------------------------------------------------------------
+      // S1 片头 (0.0-4.0s) — matches Remotion Intro exactly
+      // ---------------------------------------------------------------
+      tl.fromTo("#s1-line", { scaleX: 0 }, { scaleX: 1, duration: 0.8 }, 0);
+      tl.fromTo("#s1-title", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 1.0 }, 0.5);
+      tl.fromTo("#s1-n-remotion", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, 1.8);
+      tl.fromTo("#s1-n-hyperframes", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, 2.1);
+      tl.fromTo("#s1-n-motioncanvas", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, 2.4);
+      tl.to("#s1 .scene-inner", { opacity: 0, duration: 0.4 }, 3.6);
+      tl.set("#s1 .scene-inner", { opacity: 0 }, 4.0);
+
+      // ---------------------------------------------------------------
+      // S2/S3/S4 章节页共用时间线 — each 6s, matches Remotion Chapter
+      // ---------------------------------------------------------------
+      function chapter(prefix, start) {
+        tl.fromTo(`#${prefix}-bar`, { scaleY: 0 }, { scaleY: 1, duration: 0.4 }, start + 0);
+        tl.fromTo(`#${prefix}-no`, { opacity: 0 }, { opacity: 1, duration: 0.4 }, start + 0);
+        tl.fromTo(`#${prefix}-title`, { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6 }, start + 0.2);
+        tl.fromTo(`#${prefix}-sub`, { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6 }, start + 0.2);
+        tl.fromTo(`#${prefix}-c1`, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, start + 1.0);
+        tl.fromTo(`#${prefix}-c2`, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, start + 1.4);
+        tl.fromTo(`#${prefix}-c3`, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, start + 1.8);
+        tl.to(`#${prefix} .scene-inner`, { opacity: 0, duration: 0.4 }, start + 5.6);
+        tl.set(`#${prefix} .scene-inner`, { opacity: 0 }, start + 6.0);
+      }
+      chapter("s2", 4);
+      chapter("s3", 10);
+      chapter("s4", 16);
+
+      // ---------------------------------------------------------------
+      // S5 对比 (22.0-28.0s) — matches Remotion Versus
+      // ---------------------------------------------------------------
+      tl.fromTo("#s5-title", { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5 }, 22 + 0);
+      tl.fromTo("#s5-head", { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5 }, 22 + 0);
+      [0, 1, 2, 3].forEach((n) => {
+        const rowStart = 22 + 0.8 + 1.1 * n;
+        tl.fromTo(`#s5-row${n} .label`, { x: -16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6 }, rowStart);
+        tl.fromTo(
+          `#s5-row${n} .barfill`,
+          { scaleX: 0 },
+          { scaleX: (i, target) => Number(target.dataset.score) / 5, duration: 0.6 },
+          rowStart,
+        );
+      });
+      tl.to("#s5 .scene-inner", { opacity: 0, duration: 0.4 }, 22 + 5.6);
+      tl.set("#s5 .scene-inner", { opacity: 0 }, 28.0);
+
+      // ---------------------------------------------------------------
+      // S6 结语 (28.0-30.0s) — matches Remotion Outro
+      // ---------------------------------------------------------------
+      tl.fromTo("#s6-main", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 28 + 0);
+      tl.fromTo("#s6-sub", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 28 + 0.6);
+      tl.fromTo("#s6-black", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 28 + 1.7);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
