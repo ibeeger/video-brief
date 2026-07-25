@@ -48,7 +48,7 @@ export const CHAPTERS = [
 ] as const;
 
 export const SCORES = [
-  ['上手成本', 3, 5, 3],
+  ['上手成本(满=易)', 3, 5, 3],
   ['生态成熟度', 5, 2, 3],
   ['渲染速度', 3, 4, 4],
   ['Agent 友好度', 4, 5, 3],
