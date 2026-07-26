@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - HyperFrames 渲染：`cd hyperframes && npx --yes hyperframes@0.7.71 render --quality high --output ../output/hyperframes.mp4`
   （音频为原生挂载：index.html 内 `<audio>` 元素直接引用 `assets/voiceover.mp3`，无需后期 ffmpeg 混流；
   首次执行需 `export npm_config_cache=<项目内目录>` 规避 `~/.npm` 缓存权限问题，并设 `HYPERFRAMES_SKIP_SKILLS=1`
-  避免 `init`/`skills` 向 home 目录写入全局 skills，详见 .superpowers/sdd/2026-07-25-video-framework-comparison/task-6-report.md）
+  避免 `init`/`skills` 向 home 目录写入全局 skills，详见 docs/report.md 附录「踩坑实录」）
 - Motion Canvas 编辑器：`cd motion-canvas && npm start`
 - Motion Canvas 渲染：`node scripts/render-motion-canvas.mjs`（产出 `output/motion-canvas.mp4`）
   （**非一等 CLI**：Motion Canvas 3.17.2 无官方 headless 渲染入口，本脚本用 puppeteer-core
@@ -25,7 +25,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   而非模拟点击编辑器 UI 按钮；音频为原生混流（FFmpegExporterServer 直接接收
   `assets/voiceover.mp3`）。首次渲染前脚本会自动跑一次极短「预热」渲染，
   规避 vite optimizeDeps 首次发现依赖时的强制刷新把正式渲染冲断的问题；
-  详见 .superpowers/sdd/2026-07-25-video-framework-comparison/task-7-report.md）
+  详见 docs/report.md 附录「踩坑实录」）
 - 基准测试：`node scripts/benchmark.mjs`
 
 ## 约束
