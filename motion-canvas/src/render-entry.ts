@@ -23,8 +23,9 @@ declare global {
 function readRangeFromQuery(): [number, number] {
   const params = new URLSearchParams(window.location.search);
   const t = params.get('t');
-  // 仅用于本地烟雾测试（scripts/render-motion-canvas.mjs --smoke），
-  // 例如 render.html?t=1 只渲染前 1s，快速验证渲染链路是否打通。
+  // scripts/render-motion-canvas.mjs 内部用 render.html?t=0.2 发起一次极短
+  // 的“预热”渲染（见该脚本文件头 DX 问题 2），提前引爆 vite optimizeDeps
+  // 的强制刷新；也可手动打开 render.html?t=1 之类的 URL 做本地烟雾测试。
   if (t) return [0, Number(t)];
   return [0, Infinity];
 }
