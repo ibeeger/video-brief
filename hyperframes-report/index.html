@@ -388,6 +388,7 @@
         font-size: 26px;
         font-weight: 700;
         color: var(--hyperframes);
+        white-space: nowrap;
       }
       .score-note .note-old {
         opacity: 0;
@@ -641,10 +642,11 @@
               <span class="score-value"><span class="sv-old">4/5</span><span class="sv-new">3/5</span></span>
               <span id="s6-alert-m" class="score-alert"></span>
             </div>
-          </div>
 
-          <div id="s6-note" class="score-note">
-            <span class="note-old">与实测矛盾</span><span class="note-new">修订为 [5,3,3]</span>
+            <!-- Positioned relative to .score-group so it sits beside the bars (HyperFrames row), not the full-screen scene-inner -->
+            <div id="s6-note" class="score-note">
+              <span class="note-old">与实测矛盾</span><span class="note-new">修订为 [5,3,3]</span>
+            </div>
           </div>
 
           <div id="s6-footer" class="score-footer">三轮复测，排序不变</div>
