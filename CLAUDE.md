@@ -30,6 +30,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   详见 docs/report.md 附录「踩坑实录」）
 - 基准测试：`node scripts/benchmark.mjs`
 
+## 新开一支视频
+先走 `/video-brief`（project skill，`.claude/skills/video-brief/`）：它把需求逼成可执行 `BRIEF.md`
+（形容词必须翻译成参数）、锁定一个风格预设（apple-restraint / data-journalism / saas-dark /
+vertical-feed）、再生成 HyperFrames 项目骨架，然后交棒给 hyperframes-* 系列做动效与渲染。
+规范来源：docs/VIDEO_BRIEF.template.md；设计记录：docs/superpowers/specs/2026-07-26-video-brief-skill-design.md。
+
 ## 约束
 - 所有权限/skills 只放项目 .claude/，不写 home 目录；Python 用项目 .venv/。
 - 三实现的文案、时间轴、色板必须与 docs/storyboard.md 完全一致。
+- `.claude/skills/` 下除 `video-brief` 外均由 `skills-lock.json` 从上游 heygen-com/hyperframes 管理。
+  自建 skill 不得写入 lock，否则 `hyperframes skills` 升级会冲掉它。
