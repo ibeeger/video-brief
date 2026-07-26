@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.npm-cache/
+
+# scripts/render-motion-canvas.mjs 在此放一份 voiceover.mp3 副本，
+# 只是给 FFmpegExporterServer 按 vite 进程 cwd 解析相对路径用的渲染期产物；
+# 真正需要提交的是 public/voiceover.mp3（浏览器端引用）。见该脚本头部注释。
+/voiceover.mp3

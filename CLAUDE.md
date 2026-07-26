@@ -17,6 +17,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   首次执行需 `export npm_config_cache=<项目内目录>` 规避 `~/.npm` 缓存权限问题，并设 `HYPERFRAMES_SKIP_SKILLS=1`
   避免 `init`/`skills` 向 home 目录写入全局 skills，详见 .superpowers/sdd/2026-07-25-video-framework-comparison/task-6-report.md）
 - Motion Canvas 编辑器：`cd motion-canvas && npm start`
+- Motion Canvas 渲染：`node scripts/render-motion-canvas.mjs`（产出 `output/motion-canvas.mp4`）
+  （**非一等 CLI**：Motion Canvas 3.17.2 无官方 headless 渲染入口，本脚本用 puppeteer-core
+  驱动系统 Chrome 打开 `motion-canvas/render.html`，在浏览器上下文里直接调用
+  `@motion-canvas/core` 的 `Renderer` API + `@motion-canvas/ffmpeg` 导出链路——是「可编程渲染」
+  而非模拟点击编辑器 UI 按钮；音频为原生混流（FFmpegExporterServer 直接接收
+  `assets/voiceover.mp3`）。首次渲染前脚本会自动跑一次极短「预热」渲染，
+  规避 vite optimizeDeps 首次发现依赖时的强制刷新把正式渲染冲断的问题；
+  详见 .superpowers/sdd/2026-07-25-video-framework-comparison/task-7-report.md）
 - 基准测试：`node scripts/benchmark.mjs`
 
 ## 约束
