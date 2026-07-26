@@ -210,12 +210,13 @@ export default makeScene2D(function* (view) {
         <Layout
           ref={titleGroup}
           layout
-          position={[0, pt(0, 160)[1]]}
+          position={[0, pt(0, 160)[1] - 30]}
           offset={[0, -1]}
           direction={'column'}
           alignItems={'center'}
+          opacity={0}
         >
-          <Txt ref={title} fontFamily={FONT} fontSize={56} fontWeight={700} fill={C.text} opacity={0} textAlign={'center'}>
+          <Txt ref={title} fontFamily={FONT} fontSize={56} fontWeight={700} fill={C.text} textAlign={'center'}>
             同题对比
           </Txt>
           <Layout marginTop={84} width={1600} layout direction={'row'} alignItems={'center'}>
@@ -283,7 +284,13 @@ export default makeScene2D(function* (view) {
     };
 
     yield* all(
-      delay(0.0, all(title().opacity(1, 0.5, easeOutQuint), titleGroup().position.y(pt(0, 160)[1], 0.5, easeOutQuint))),
+      delay(
+        0.0,
+        all(
+          titleGroup().opacity(1, 0.5, easeOutQuint),
+          titleGroup().position.y(pt(0, 160)[1], 0.5, easeOutQuint),
+        ),
+      ),
       delay(0.8, enterRow(0)),
       delay(1.9, enterRow(1)),
       delay(3.0, enterRow(2)),
