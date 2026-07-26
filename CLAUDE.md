@@ -17,6 +17,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   （音频为原生挂载：index.html 内 `<audio>` 元素直接引用 `assets/voiceover.mp3`，无需后期 ffmpeg 混流；
   首次执行需 `export npm_config_cache=<项目内目录>` 规避 `~/.npm` 缓存权限问题，并设 `HYPERFRAMES_SKIP_SKILLS=1`
   避免 `init`/`skills` 向 home 目录写入全局 skills，详见 docs/report.md 附录「踩坑实录」）
+- 报告视频旁白：`bash scripts/build-voiceover-report.sh`（产出 assets/voiceover-report.mp3）
+- 报告讲解视频渲染：`cd hyperframes-report && npx --yes hyperframes@0.7.71 render --quality high --output ../output/report-video.mp4`
 - Motion Canvas 编辑器：`cd motion-canvas && npm start`
 - Motion Canvas 渲染：`node scripts/render-motion-canvas.mjs`（产出 `output/motion-canvas.mp4`）
   （**非一等 CLI**：Motion Canvas 3.17.2 无官方 headless 渲染入口，本脚本用 puppeteer-core
