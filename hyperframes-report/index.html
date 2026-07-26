@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>报告讲解视频 — HyperFrames</title>
+    <script src="./vendor/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "PingFang SC";
+        src: local("PingFang SC");
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #000;
+      }
+      body {
+        font-family: "PingFang SC", system-ui, sans-serif;
+      }
+      :root {
+        --bg: #0b0d12;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+      }
+      #s0 {
+        background: var(--bg);
+      }
+      #s0-pulse {
+        position: absolute;
+        top: 1030px;
+        left: 1860px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #8b93a7;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-width="1920"
+      data-height="1080"
+      data-duration="120"
+      data-fps="30"
+    >
+      <!-- 占位场景 0-120s：纯背景色，后续按 Task 4 拆分为七场景 -->
+      <section id="s0" class="clip" data-start="0" data-duration="120" data-track-index="1">
+        <!-- 占位脉冲点：满足渲染自检的运动采样要求，Task 4 拆分七场景时移除 -->
+        <span id="s0-pulse"></span>
+      </section>
+
+      <!-- 旁白音轨，独立音频轨道，原生 <audio> 挂载 -->
+      <audio id="voiceover" src="assets/voiceover-report.mp3" data-start="0" data-duration="120" data-track-index="10"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      tl.to("#s0-pulse", { opacity: 0.25, duration: 1, repeat: 119, yoyo: true, ease: "sine.inOut" }, 0);
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
