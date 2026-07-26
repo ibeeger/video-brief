@@ -2,55 +2,55 @@
   {
     "name": "remotion",
     "runs": [
-      14.2,
-      13.88,
-      14.42
+      13.59,
+      13.91,
+      13.92
     ],
-    "meanSec": 14.17,
-    "sdSec": 0.23,
+    "meanSec": 13.81,
+    "sdSec": 0.15,
     "peakRssMb": 748,
     "memNote": "/usr/bin/time -l 只测得到本命令的直接子进程（npx/node），测不到其再 spawn 的无头 Chrome 子进程真实峰值；如实记录此边界内的观测值，不代表整条渲染链路的真实峰值内存。",
-    "sizeBytes": 2331860,
+    "sizeBytes": 2332129,
     "probe": {
       "duration": "30.058667",
-      "size": "2331860",
-      "bit_rate": "620615"
+      "size": "2332129",
+      "bit_rate": "620687"
     }
   },
   {
     "name": "hyperframes",
     "runs": [
-      27.46,
-      22.39,
-      22.03
+      22.02,
+      22.13,
+      21.98
     ],
-    "meanSec": 23.96,
-    "sdSec": 2.48,
+    "meanSec": 22.04,
+    "sdSec": 0.06,
     "peakRssMb": 845,
     "memNote": "/usr/bin/time -l 只测得到本命令的直接子进程（npx/node），测不到其再 spawn 的无头 Chrome 子进程真实峰值；如实记录此边界内的观测值，不代表整条渲染链路的真实峰值内存。",
-    "sizeBytes": 2500183,
+    "sizeBytes": 2499690,
     "probe": {
       "duration": "30.016000",
-      "size": "2500183",
-      "bit_rate": "666360"
+      "size": "2499690",
+      "bit_rate": "666228"
     }
   },
   {
     "name": "motion-canvas",
     "runs": [
+      22.86,
       22.84,
-      22.89,
-      22.85
+      22.89
     ],
     "meanSec": 22.86,
     "sdSec": 0.02,
-    "peakRssMb": 802,
+    "peakRssMb": 799,
     "memNote": "/usr/bin/time -l 只测得到本命令的直接子进程（npx/node），测不到其再 spawn 的无头 Chrome 子进程真实峰值；如实记录此边界内的观测值，不代表整条渲染链路的真实峰值内存。",
-    "sizeBytes": 781454,
+    "sizeBytes": 786462,
     "probe": {
       "duration": "30.033333",
-      "size": "781454",
-      "bit_rate": "208156"
+      "size": "786462",
+      "bit_rate": "209490"
     },
     "note": "端到端墙钟时间含 vite dev server 冷启动 + 0.2s 预热渲染 + 5s 稳定等待，这是 Motion Canvas 官方渲染链路（无官方 headless CLI，脚本经 puppeteer-core 驱动浏览器调用 Renderer API）固有的固定开销，按控制器裁决不从计时中扣除；详见 .superpowers/sdd/2026-07-25-video-framework-comparison/task-7-report.md。"
   }

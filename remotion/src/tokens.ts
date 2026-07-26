@@ -50,6 +50,6 @@ export const CHAPTERS = [
 export const SCORES = [
   ['上手成本(满=易)', 3, 5, 3],
   ['生态成熟度', 5, 2, 3],
-  ['渲染速度', 3, 4, 4],
+  ['渲染速度', 5, 3, 3],
   ['Agent 友好度', 4, 5, 3],
 ] as const;
