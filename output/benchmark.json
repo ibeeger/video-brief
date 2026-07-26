@@ -1,0 +1,57 @@
+[
+  {
+    "name": "remotion",
+    "runs": [
+      14.2,
+      13.88,
+      14.42
+    ],
+    "meanSec": 14.17,
+    "sdSec": 0.23,
+    "peakRssMb": 748,
+    "memNote": "/usr/bin/time -l 只测得到本命令的直接子进程（npx/node），测不到其再 spawn 的无头 Chrome 子进程真实峰值；如实记录此边界内的观测值，不代表整条渲染链路的真实峰值内存。",
+    "sizeBytes": 2331860,
+    "probe": {
+      "duration": "30.058667",
+      "size": "2331860",
+      "bit_rate": "620615"
+    }
+  },
+  {
+    "name": "hyperframes",
+    "runs": [
+      27.46,
+      22.39,
+      22.03
+    ],
+    "meanSec": 23.96,
+    "sdSec": 2.48,
+    "peakRssMb": 845,
+    "memNote": "/usr/bin/time -l 只测得到本命令的直接子进程（npx/node），测不到其再 spawn 的无头 Chrome 子进程真实峰值；如实记录此边界内的观测值，不代表整条渲染链路的真实峰值内存。",
+    "sizeBytes": 2500183,
+    "probe": {
+      "duration": "30.016000",
+      "size": "2500183",
+      "bit_rate": "666360"
+    }
+  },
+  {
+    "name": "motion-canvas",
+    "runs": [
+      22.84,
+      22.89,
+      22.85
+    ],
+    "meanSec": 22.86,
+    "sdSec": 0.02,
+    "peakRssMb": 802,
+    "memNote": "/usr/bin/time -l 只测得到本命令的直接子进程（npx/node），测不到其再 spawn 的无头 Chrome 子进程真实峰值；如实记录此边界内的观测值，不代表整条渲染链路的真实峰值内存。",
+    "sizeBytes": 781454,
+    "probe": {
+      "duration": "30.033333",
+      "size": "781454",
+      "bit_rate": "208156"
+    },
+    "note": "端到端墙钟时间含 vite dev server 冷启动 + 0.2s 预热渲染 + 5s 稳定等待，这是 Motion Canvas 官方渲染链路（无官方 headless CLI，脚本经 puppeteer-core 驱动浏览器调用 Renderer API）固有的固定开销，按控制器裁决不从计时中扣除；详见 .superpowers/sdd/2026-07-25-video-framework-comparison/task-7-report.md。"
+  }
+]
