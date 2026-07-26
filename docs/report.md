@@ -12,8 +12,8 @@
 | 生态成熟度 | 5 | 2 | 3 |
 | 渲染速度（实测修订后） | 5 | 3 | 3 |
 | Agent 友好度 | 4 | 5 | 3 |
-| 渲染耗时均值（3 次） | 13.81s | 22.04s | 22.86s |
-| 产物体积 | 2.33 MB | 2.50 MB | 0.79 MB |
+| 渲染耗时均值（3 次） | 14.06s | 21.34s | 22.79s |
+| 产物体积 | 2.33 MB | 2.50 MB | 0.76 MB |
 | 代码行数 | 425 行 | 530 行 | 731 行（含渲染脚本） |
 
 一句话选型建议：
@@ -101,9 +101,13 @@
 
 | 目标 | 单次耗时(s) | 均值(s) | 标准差(s) | 峰值 RSS(MB) | 产物体积 | 时长(probe) | 码率 |
 |---|---|---|---|---|---|---|---|
-| remotion | 13.59 / 13.91 / 13.92 | **13.81** | 0.15 | 748 | 2,332,129 B (2.33 MB) | 30.058667s | 620,687 bps |
-| hyperframes | 22.02 / 22.13 / 21.98 | **22.04** | 0.06 | 845 | 2,499,690 B (2.50 MB) | 30.016000s | 666,228 bps |
-| motion-canvas | 22.86 / 22.84 / 22.89 | **22.86** | 0.02 | 799 | 786,462 B (0.79 MB) | 30.033333s | 209,490 bps |
+| remotion | 14.41 / 14.03 / 13.74 | **14.06** | 0.27 | 748 | 2,332,129 B (2.33 MB) | 30.058667s | 620,687 bps |
+| hyperframes | 21.60 / 21.26 / 21.17 | **21.34** | 0.19 | 845 | 2,499,690 B (2.50 MB) | 30.016000s | 666,228 bps |
+| motion-canvas | 22.76 / 22.82 / 22.80 | **22.79** | 0.02 | 799 | 792,877 B (0.76 MB) | 30.033333s | 211,199 bps |
+
+（终审修复 Motion Canvas 三处入场动效 no-op 后，随同终审重跑的最新一轮 3×3 实测；Motion Canvas
+产物体积从 786,462 B（约 0.75 MB）微升到 792,877 B（约 0.76 MB）——是画面里新增了真实位移带来的
+像素熵增，非回归。三者相对快慢排序不变，数值抖动在正常范围内。）
 
 测量口径说明（如实带上，不省略边界）：
 
@@ -115,7 +119,7 @@
   （npx/node），三者的渲染链路都会再往下 spawn 无头 Chrome（Remotion/HyperFrames 经各自的 puppeteer
   依赖，Motion Canvas 经渲染脚本自行 spawn 的 vite + puppeteer-core），测不到更深层 Chrome 子进程的
   真实峰值，如实记录此边界内的观测值，不代表整条渲染链路的真实峰值内存（`memNote` 字段原文）。
-- **体积**：Motion Canvas 产物（0.79 MB）明显小于另两者（2.33/2.50 MB），码率 209k bps vs
+- **体积**：Motion Canvas 产物（0.76 MB）明显小于另两者（2.33/2.50 MB），码率 211k bps vs
   620k/666k bps 差了近 3 倍。已用 `-count_frames` 确认帧数正确（901 帧，见 task-7-report.md），目视
   截帧确认画面正确——这是编码器/CRF 默认设置在本片大面积纯色背景下高度可压缩造成的**编码码率差异，
   非画质/正确性问题**，不应误读为"漏帧"或"画质缩水"。
@@ -128,7 +132,9 @@ S5「渲染速度」画面设计值原为 `[3, 4, 4]`（Remotion/HyperFrames/Mot
 裁决修订为 **`[5, 3, 3]`**，同步修改四处并保持逐字一致：`docs/storyboard.md` S5 评分表、
 `remotion/src/tokens.ts`、`hyperframes/index.html` 对应 `data-score`、`motion-canvas/src/tokens.ts`，
 随后重跑 `node scripts/benchmark.mjs` 完整重渲染三支成片并刷新 `benchmark.json`。复审阶段又完整重跑
-一轮全新 3×3（本报告表格中的最终数值），结果同向：Remotion 13.81s 仍明显最快，验证修订成立。
+一轮全新 3×3，结果同向：Remotion 仍明显最快，验证修订成立。终审修复 Motion Canvas 动效 no-op 后又
+完整重跑一轮 3×3（本报告表格中的最终数值：Remotion 14.06s / HyperFrames 21.34s /
+Motion Canvas 22.79s），排序不变，进一步确认修订成立。
 
 ## 5 成品质量
 
@@ -147,7 +153,14 @@ S5「渲染速度」画面设计值原为 `[3, 4, 4]`（Remotion/HyperFrames/Mot
   逐帧核对（task-5/6/7-report.md 均有独立静帧自查记录）均与 `docs/storyboard.md` 时间点吻合，唯一
   已知偏差是 HyperFrames 的缓动函数用 GSAP `power3.out` **近似**替代 storyboard 规定的
   `cubic-bezier(0.22,1,0.36,1)`（brief 授权 + 官方 skill house default，非精确复刻，肉眼差异极小，
-  详见"附录"）。
+  详见"附录"）。**终审补充**：像素级双帧比对发现 Motion Canvas `compare.tsx` 里三处入场位移
+  （S1 主标题上移 24px、S1 三框架名各上移 16px、S5 行标签滑入 16px）此前实为 no-op——这些节点都
+  处于某个开了 `layout` 的 flex 祖先托管链下，渲染位置由 flex 的 `computedPosition()` 决定，对
+  `position` 属性的补间数值确实在变但画面纹丝不动（其中一处与已修复的 S5 标题组滑入
+  no-op 同类，另两处是新发现）。复审已用"占位 spacer（保留原有间距）+ 挂在不开 `layout` 的兄弟/
+  祖先容器下的可见覆盖节点（用 `absolutePosition()` 读取世界坐标落点，规避 flex 嵌套换算）"的方式
+  修复，重渲染后双时间点截帧（t=0.7s/1.1s、t=22.9s/23.2s）像素比对确认三处均已产生真实位移，
+  详见 `.superpowers/sdd/2026-07-25-video-framework-comparison/final-fix-report.md`。
 
 ## 6 生态与扩展
 
@@ -173,7 +186,7 @@ S5「渲染速度」画面设计值原为 `[3, 4, 4]`（Remotion/HyperFrames/Mot
 ## 7 适用场景结论
 
 - **Remotion → 工程团队**：React 心智模型、类型系统、成熟渲染管线（Studio/Lambda）、实测渲染
-  速度三者中最快（13.81s），代码量最省（425 行），最适合需要长期维护、CI 集成、多人协作的生产级
+  速度三者中最快（14.06s），代码量最省（425 行），最适合需要长期维护、CI 集成、多人协作的生产级
   视频管线。
 - **HyperFrames → Agent 管线**：HTML 即分镜的低门槛 + `check` 静态校验闸门，Agent 友好度评分最高，
   最适合"AI 生成 → 自动校验 → 批量渲染"的自动化内容管线，但生态成熟度目前最弱，第三方组件/案例
@@ -230,6 +243,11 @@ S5「渲染速度」画面设计值原为 `[3, 4, 4]`（Remotion/HyperFrames/Mot
    建议拆成子组合，仅为 info 级告警不阻断渲染，本项目规模下判断保留 monolithic 结构收益更高。
 6. **已知偏差**：GSAP 缓动用 `power3.out` 近似 storyboard 规定的
    `cubic-bezier(0.22,1,0.36,1)`（brief 授权 + 官方 skill house default，非精确复刻）。
+7. **GSAP 初版走 jsDelivr CDN，终审前已本地化**：`index.html` 最初用
+   `<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js">` 引入 GSAP，与项目
+   "同一台机器、无额外网络依赖"的实验设置表述不符（渲染时静默依赖外网可达性）。终审已将该版本的
+   `gsap.min.js` 下载进 `hyperframes/vendor/`，`index.html` 改用本地相对路径
+   `./vendor/gsap.min.js`，删除 CDN 引用，`hyperframes check` 复核通过。
 
 ### Motion Canvas（task-7-report.md）
 1. **CJS/ESM interop 崩溃**：`@motion-canvas/vite-plugin`/`@motion-canvas/ffmpeg` 是纯 CJS 包，
@@ -253,10 +271,11 @@ S5「渲染速度」画面设计值原为 `[3, 4, 4]`（Remotion/HyperFrames/Mot
    未解决，社区共识转向 fork 项目 Revideo；本项目选择绕开编辑器 UI，直接调用与编辑器同一条内部
    API（`import project from './project?project'` + `new Renderer(project)`），属"可编程渲染"而
    非一等 CLI。
-6. **产物体积偏小非画质问题**：`output/motion-canvas.mp4` 体积（0.79 MB）明显小于另两者
+6. **产物体积偏小非画质问题**：`output/motion-canvas.mp4` 体积（0.76 MB）明显小于另两者
    （2.33/2.50 MB），已用 `-count_frames` 确认帧数正确（901 帧），是 libx264 默认 CRF 与本片大面积
-   纯色背景高度可压缩共同导致的编码码率差异（209k bps vs 620k/666k bps），非渲染缺陷。
-7. **计时含固定开销**：端到端墙钟时间（22.86s 均值）含 vite 冷启动 + 0.2s 预热渲染 + 5s 稳定等待，
+   纯色背景高度可压缩共同导致的编码码率差异（211k bps vs 620k/666k bps），非渲染缺陷。
+7. **计时含固定开销**：端到端墙钟时间（22.79s 均值）含 vite dev server 冷启动 + 0.2s 预热渲染 + 5s
+   稳定等待，
    这部分是官方渲染链路（无一等 headless CLI）固有的固定成本，按控制器裁决不从计时中扣除，仅在
    `benchmark.json` 对应条目加 `note` 字段说明背景，避免读者误读为"渲染引擎本身更慢"。
 

@@ -2,5 +2,6 @@
 node_modules/
 .venv/
 output/*.mp4
+output/work-*/
 .superpowers/
 .npm-cache/

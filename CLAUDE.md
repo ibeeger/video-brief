@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 唯一内容依据：docs/storyboard.md。规格：1920×1080·30fps·30s·含旁白音轨。
 
 ## 常用命令
-- 旁白生成：`bash scripts/build-voiceover.sh`（产出 assets/voiceover.mp3）
+- 首次初始化（fresh clone 前置）：`python3 -m venv .venv && .venv/bin/pip install edge-tts`
+- 旁白生成：`bash scripts/build-voiceover.sh`（产出 assets/voiceover.mp3，依赖上一步的 .venv/bin/edge-tts）
 - Remotion 预览：`cd remotion && npx remotion studio`
 - Remotion 渲染：`cd remotion && npx remotion render src/index.ts Compare ../output/remotion.mp4`
 - HyperFrames 预览：`cd hyperframes && npx --yes hyperframes@0.7.71 preview`
