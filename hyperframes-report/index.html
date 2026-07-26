@@ -10,6 +10,19 @@
         font-family: "PingFang SC";
         src: local("PingFang SC");
       }
+      @font-face {
+        font-family: "Menlo";
+        src: local("Menlo");
+      }
+      :root {
+        --bg: #0b0d12;
+        --panel: #141926;
+        --text: #f2f4f8;
+        --muted: #8b93a7;
+        --remotion: #3b82f6;
+        --hyperframes: #f97316;
+        --motioncanvas: #10b981;
+      }
       * {
         margin: 0;
         padding: 0;
@@ -17,7 +30,6 @@
       }
       html,
       body {
-        margin: 0;
         width: 1920px;
         height: 1080px;
         overflow: hidden;
@@ -25,9 +37,7 @@
       }
       body {
         font-family: "PingFang SC", system-ui, sans-serif;
-      }
-      :root {
-        --bg: #0b0d12;
+        color: var(--text);
       }
       #root {
         position: relative;
@@ -35,21 +45,404 @@
         height: 1080px;
         overflow: hidden;
       }
+      .full-bleed {
+        position: absolute;
+        inset: 0;
+        background: var(--bg);
+      }
       .clip {
         position: absolute;
         inset: 0;
       }
-      #s0 {
-        background: var(--bg);
-      }
-      #s0-pulse {
+      .scene-inner {
         position: absolute;
-        top: 1030px;
-        left: 1860px;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: #8b93a7;
+        inset: 0;
+      }
+      .mono {
+        font-family: Menlo, monospace;
+      }
+
+      /* Feature card — matches hyperframes/index.html (30s film) */
+      .card {
+        width: 500px;
+        height: 180px;
+        background: var(--panel);
+        border-radius: 16px;
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+          0 24px 48px -24px rgba(0, 0, 0, 0.65);
+        padding: 32px 36px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      .card .kw {
+        font-size: 30px;
+        font-weight: 700;
+        margin-bottom: 14px;
+      }
+      .card .desc {
+        font-size: 22px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      /* Chapter header — shared by S2-S6 */
+      .chapter .bar-wrap {
+        position: absolute;
+        top: 160px;
+        left: 160px;
+        display: flex;
+        align-items: center;
+        height: 56px;
+      }
+      .chapter .accent-bar {
+        display: block;
+        width: 6px;
+        height: 56px;
+        border-radius: 3px;
+        background: var(--muted);
+        transform-origin: top;
+        transform: scaleY(0);
+      }
+      .chapter .no {
+        margin-left: 20px;
+        font-size: 22px;
+        color: var(--muted);
+        letter-spacing: 2px;
+        opacity: 0;
+      }
+      .chapter .title {
+        position: absolute;
+        top: 236px;
+        left: 160px;
+        font-size: 48px;
+        font-weight: 700;
+        max-width: 1600px;
+        opacity: 0;
+        transform: translateX(-40px);
+      }
+
+      /* Generic horizontal bar-chart row — reused by S3 / S4 */
+      .bar-row {
+        position: absolute;
+        left: 160px;
+        display: flex;
+        align-items: center;
+        height: 40px;
+      }
+      .bar-label {
+        width: 220px;
+        flex-shrink: 0;
+        font-size: 26px;
+        font-weight: 700;
+      }
+      .bar-track {
+        position: relative;
+        width: 1200px;
+        height: 28px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        margin-right: 24px;
+        flex-shrink: 0;
+      }
+      .bar-fill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: block;
+        height: 28px;
+        border-radius: 6px;
+        background: var(--c);
+        transform-origin: left center;
+        transform: scaleX(0);
+      }
+      .bar-value {
+        font-size: 26px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .bar-value small {
+        font-size: 18px;
+        font-weight: 400;
+        color: var(--muted);
+        margin-left: 6px;
+      }
+      .sub-heading {
+        position: absolute;
+        top: 360px;
+        left: 160px;
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--muted);
+        opacity: 0;
+      }
+      .footnote {
+        position: absolute;
+        left: 160px;
+        max-width: 1600px;
+        font-size: 22px;
+        color: var(--muted);
+        line-height: 1.5;
+        opacity: 0;
+      }
+      #s3b {
+        opacity: 0;
+      }
+
+      /* S1 开场 */
+      #s1 .inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
+      #s1 .line {
+        display: block;
+        width: 640px;
+        height: 2px;
+        background: var(--muted);
+        transform-origin: center;
+        margin-bottom: 56px;
+        transform: scaleX(0);
+      }
+      #s1 h1 {
+        font-size: 64px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 40px;
+        max-width: 1600px;
+        text-align: center;
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      #s1 .names {
+        display: flex;
+        align-items: center;
+        gap: 56px;
+        margin-bottom: 40px;
+      }
+      #s1 .names span {
+        display: inline-block;
+        font-size: 32px;
+        font-weight: 700;
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      #s1 .sub {
+        font-size: 28px;
+        color: var(--muted);
+        text-align: center;
+        max-width: 1600px;
+        opacity: 0;
+      }
+
+      /* S2 实验设定 */
+      .spec-cards {
+        position: absolute;
+        top: 420px;
+        left: 160px;
+        display: flex;
+        gap: 50px;
+      }
+      .s2-emph {
+        position: absolute;
+        top: 740px;
+        left: 160px;
+        right: 160px;
+        font-size: 26px;
+        font-weight: 700;
+        text-align: center;
+        opacity: 0;
+      }
+
+      /* S4 代码量 — segmented highlight on the Motion Canvas bar */
+      .bar-highlight {
+        position: absolute;
+        top: 0;
+        height: 28px;
+        border-radius: 0 6px 6px 0;
+        background-image: repeating-linear-gradient(
+          45deg,
+          rgba(255, 255, 255, 0.4) 0px,
+          rgba(255, 255, 255, 0.4) 6px,
+          rgba(255, 255, 255, 0.06) 6px,
+          rgba(255, 255, 255, 0.06) 12px
+        );
+        opacity: 0;
+      }
+
+      /* S5 踩坑精选 */
+      .pit-cards {
+        position: absolute;
+        top: 380px;
+        left: 160px;
+        display: flex;
+        gap: 140px;
+        perspective: 1200px;
+      }
+      .pit-card {
+        width: 440px;
+        height: 360px;
+        background: var(--panel);
+        border-radius: 16px;
+        border-top: 8px solid var(--c);
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+          0 24px 48px -24px rgba(0, 0, 0, 0.65);
+        padding: 36px 32px;
+        display: flex;
+        flex-direction: column;
+        transform-origin: top center;
+        opacity: 0;
+      }
+      .pit-card .head {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--c);
+        margin-bottom: 20px;
+      }
+      .pit-card .body {
+        font-size: 22px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      /* S6 评分修订 */
+      .score-metric {
+        position: absolute;
+        top: 340px;
+        left: 160px;
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--muted);
+        opacity: 0;
+      }
+      .score-group {
+        position: absolute;
+        top: 420px;
+        left: 160px;
+        opacity: 0;
+      }
+      .score-row {
+        position: relative;
+        display: flex;
+        align-items: center;
+        height: 64px;
+      }
+      .score-label {
+        width: 220px;
+        font-size: 26px;
+        font-weight: 700;
+      }
+      .score-track {
+        width: 320px;
+        height: 16px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        margin-right: 20px;
+        flex-shrink: 0;
+      }
+      .score-fill {
+        display: block;
+        width: 320px;
+        height: 16px;
+        border-radius: 8px;
+        transform-origin: left center;
+        transform: scaleX(0);
+      }
+      .score-alert {
+        position: absolute;
+        left: 220px;
+        top: 24px;
+        width: 320px;
+        height: 16px;
+        border-radius: 8px;
+        border: 2px solid var(--hyperframes);
+        opacity: 0;
+        pointer-events: none;
+      }
+      .score-value {
+        position: relative;
+        width: 90px;
+        font-size: 26px;
+        font-weight: 700;
+      }
+      .score-value .sv-new {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+      }
+      .score-note {
+        position: absolute;
+        left: 680px;
+        top: 96px;
+        max-width: 500px;
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--hyperframes);
+      }
+      .score-note .note-old {
+        opacity: 0;
+      }
+      .score-note .note-new {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+      }
+      .score-footer {
+        position: absolute;
+        top: 760px;
+        left: 160px;
+        right: 160px;
+        font-size: 24px;
+        text-align: center;
+        opacity: 0;
+      }
+
+      /* S7 结语 */
+      .outro-lines {
+        position: absolute;
+        top: 340px;
+        left: 160px;
+        right: 160px;
+      }
+      .outro-line {
+        display: block;
+        font-size: 32px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 36px;
+        opacity: 0;
+      }
+      .outro-line .arrow {
+        color: var(--muted);
+        font-weight: 400;
+        margin: 0 16px;
+      }
+      .outro-headline {
+        position: absolute;
+        top: 700px;
+        left: 160px;
+        right: 160px;
+        font-size: 56px;
+        font-weight: 700;
+        text-align: center;
+        opacity: 0;
+      }
+      .blackout {
+        position: absolute;
+        inset: 0;
+        background: #000;
+        opacity: 0;
       }
     </style>
   </head>
@@ -63,10 +456,212 @@
       data-duration="120"
       data-fps="30"
     >
-      <!-- 占位场景 0-120s：纯背景色，后续按 Task 4 拆分为七场景 -->
-      <section id="s0" class="clip" data-start="0" data-duration="120" data-track-index="1">
-        <!-- 占位脉冲点：满足渲染自检的运动采样要求，Task 4 拆分七场景时移除 -->
-        <span id="s0-pulse"></span>
+      <!-- Shared background — not a clip, spans the whole composition -->
+      <div id="bg" class="full-bleed"></div>
+
+      <!-- ================= S1 开场 0-10s ================= -->
+      <section id="s1" class="clip" data-start="0" data-duration="10" data-track-index="1">
+        <div class="scene-inner">
+          <div class="inner">
+            <span id="s1-line" class="line"></span>
+            <h1 id="s1-title">一份全实测的三框架对比报告</h1>
+            <div id="s1-names" class="names">
+              <span id="s1-n-remotion" style="color: var(--remotion)">Remotion</span>
+              <span id="s1-n-hyperframes" style="color: var(--hyperframes)">HyperFrames</span>
+              <span id="s1-n-motioncanvas" style="color: var(--motioncanvas)">Motion Canvas</span>
+            </div>
+            <div id="s1-sub" class="sub">同一支 30 秒视频 · 三种实现 · 全部实测</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= S2 实验设定 10-24s ================= -->
+      <section id="s2" class="clip chapter" data-start="10" data-duration="14" data-track-index="1">
+        <div class="scene-inner">
+          <div class="bar-wrap">
+            <span id="s2-bar" class="accent-bar"></span>
+            <span id="s2-no" class="no mono">01</span>
+          </div>
+          <h2 id="s2-title" class="title">实验设定</h2>
+          <div class="spec-cards">
+            <div id="s2-c1" class="card">
+              <div class="kw">同一份分镜</div>
+              <div class="desc">docs/storyboard.md 逐字一致</div>
+            </div>
+            <div id="s2-c2" class="card">
+              <div class="kw">同一段旁白</div>
+              <div class="desc">assets/voiceover.mp3 共用音轨</div>
+            </div>
+            <div id="s2-c3" class="card">
+              <div class="kw">同一台机器</div>
+              <div class="desc">macOS · Chrome · FFmpeg</div>
+            </div>
+          </div>
+          <div id="s2-emph" class="s2-emph">唯一的变量：框架本身</div>
+        </div>
+      </section>
+
+      <!-- ================= S3 渲染性能 24-48s（两拍） ================= -->
+      <section id="s3" class="clip chapter" data-start="24" data-duration="24" data-track-index="1">
+        <div class="scene-inner">
+          <div class="bar-wrap">
+            <span id="s3-bar" class="accent-bar"></span>
+            <span id="s3-no" class="no mono">02</span>
+          </div>
+          <h2 id="s3-title" class="title">渲染性能 · 实测 3×3</h2>
+
+          <!-- 拍A 渲染耗时 -->
+          <div id="s3a" class="scene-inner">
+            <div id="s3a-r" class="bar-row" style="top: 360px">
+              <span class="bar-label">Remotion</span>
+              <div class="bar-track"><div class="bar-fill" style="--c: var(--remotion); width: 703px"></div></div>
+              <span class="bar-value">14.06s <small>±0.27</small></span>
+            </div>
+            <div id="s3a-h" class="bar-row" style="top: 470px">
+              <span class="bar-label">HyperFrames</span>
+              <div class="bar-track"><div class="bar-fill" style="--c: var(--hyperframes); width: 1067px"></div></div>
+              <span class="bar-value">21.34s <small>±0.19</small></span>
+            </div>
+            <div id="s3a-m" class="bar-row" style="top: 580px">
+              <span class="bar-label">Motion Canvas</span>
+              <div class="bar-track"><div class="bar-fill" style="--c: var(--motioncanvas); width: 1140px"></div></div>
+              <span class="bar-value">22.79s <small>±0.02</small></span>
+            </div>
+          </div>
+
+          <!-- 拍B 产物体积 -->
+          <div id="s3b" class="scene-inner">
+            <div id="s3b-sub" class="sub-heading">产物体积</div>
+            <div id="s3b-r" class="bar-row" style="top: 440px">
+              <span class="bar-label">Remotion</span>
+              <div class="bar-track"><div class="bar-fill" style="--c: var(--remotion); width: 1118.4px"></div></div>
+              <span class="bar-value">2.33 MB</span>
+            </div>
+            <div id="s3b-h" class="bar-row" style="top: 550px">
+              <span class="bar-label">HyperFrames</span>
+              <div class="bar-track"><div class="bar-fill" style="--c: var(--hyperframes); width: 1200px"></div></div>
+              <span class="bar-value">2.50 MB</span>
+            </div>
+            <div id="s3b-m" class="bar-row" style="top: 660px">
+              <span class="bar-label">Motion Canvas</span>
+              <div class="bar-track"><div class="bar-fill" style="--c: var(--motioncanvas); width: 364.8px"></div></div>
+              <span class="bar-value">0.76 MB</span>
+            </div>
+            <div id="s3b-foot" class="footnote" style="top: 760px">
+              Motion Canvas 码率 211k vs 620k/666k——编码差异，非画质缩水
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= S4 代码量 48-66s ================= -->
+      <section id="s4" class="clip chapter" data-start="48" data-duration="18" data-track-index="1">
+        <div class="scene-inner">
+          <div class="bar-wrap">
+            <span id="s4-bar" class="accent-bar"></span>
+            <span id="s4-no" class="no mono">03</span>
+          </div>
+          <h2 id="s4-title" class="title">代码量</h2>
+
+          <div id="s4-r" class="bar-row" style="top: 380px">
+            <span class="bar-label">Remotion</span>
+            <div class="bar-track"><div class="bar-fill" style="--c: var(--remotion); width: 680px"></div></div>
+            <span class="bar-value">425 行</span>
+          </div>
+          <div id="s4-h" class="bar-row" style="top: 490px">
+            <span class="bar-label">HyperFrames</span>
+            <div class="bar-track"><div class="bar-fill" style="--c: var(--hyperframes); width: 848px"></div></div>
+            <span class="bar-value">530 行</span>
+          </div>
+          <div id="s4-m" class="bar-row" style="top: 600px">
+            <span class="bar-label">Motion Canvas</span>
+            <div class="bar-track">
+              <div class="bar-fill" style="--c: var(--motioncanvas); width: 1169.6px"></div>
+              <div id="s4-highlight" class="bar-highlight" style="left: 813.2px; width: 356.4px"></div>
+            </div>
+            <span class="bar-value">731 行</span>
+          </div>
+          <div id="s4-anno" class="footnote" style="top: 700px; color: var(--motioncanvas)">
+            224 行 = 无 headless CLI 的代价
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= S5 踩坑精选 66-90s ================= -->
+      <section id="s5" class="clip chapter" data-start="66" data-duration="24" data-track-index="1">
+        <div class="scene-inner">
+          <div class="bar-wrap">
+            <span id="s5-bar" class="accent-bar"></span>
+            <span id="s5-no" class="no mono">04</span>
+          </div>
+          <h2 id="s5-title" class="title">踩坑各有代表作</h2>
+          <div class="pit-cards">
+            <div id="s5-c1" class="pit-card" style="--c: var(--remotion)">
+              <div class="head">TypeScript 7 不兼容</div>
+              <div class="body">esbuild-loader 报错 → 降级 5.9 解决</div>
+            </div>
+            <div id="s5-c2" class="pit-card" style="--c: var(--hyperframes)">
+              <div class="head">check 五类静态闸门</div>
+              <div class="body">Lint / Runtime / Layout / Motion / Contrast；字体与淡出都要显式声明</div>
+            </div>
+            <div id="s5-c3" class="pit-card" style="--c: var(--motioncanvas)">
+              <div class="head">无一等 headless CLI</div>
+              <div class="body">上游 #415/#1218 未解决 → 自建 puppeteer 可编程渲染</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= S6 评分修订 90-106s ================= -->
+      <section id="s6" class="clip chapter" data-start="90" data-duration="16" data-track-index="1">
+        <div class="scene-inner">
+          <div class="bar-wrap">
+            <span id="s6-bar" class="accent-bar"></span>
+            <span id="s6-no" class="no mono">05</span>
+          </div>
+          <h2 id="s6-title" class="title">一次数据驱动的修订</h2>
+          <div id="s6-metric" class="score-metric">渲染速度</div>
+
+          <div class="score-group">
+            <div id="s6-row-r" class="score-row" style="top: 0px">
+              <span class="score-label">Remotion</span>
+              <div class="score-track"><div class="score-fill" style="background: var(--remotion)"></div></div>
+              <span class="score-value"><span class="sv-old">3/5</span><span class="sv-new">5/5</span></span>
+              <span id="s6-alert-r" class="score-alert"></span>
+            </div>
+            <div id="s6-row-h" class="score-row" style="top: 80px">
+              <span class="score-label">HyperFrames</span>
+              <div class="score-track"><div class="score-fill" style="background: var(--hyperframes)"></div></div>
+              <span class="score-value"><span class="sv-old">4/5</span><span class="sv-new">3/5</span></span>
+              <span id="s6-alert-h" class="score-alert"></span>
+            </div>
+            <div id="s6-row-m" class="score-row" style="top: 160px">
+              <span class="score-label">Motion Canvas</span>
+              <div class="score-track"><div class="score-fill" style="background: var(--motioncanvas)"></div></div>
+              <span class="score-value"><span class="sv-old">4/5</span><span class="sv-new">3/5</span></span>
+              <span id="s6-alert-m" class="score-alert"></span>
+            </div>
+          </div>
+
+          <div id="s6-note" class="score-note">
+            <span class="note-old">与实测矛盾</span><span class="note-new">修订为 [5,3,3]</span>
+          </div>
+
+          <div id="s6-footer" class="score-footer">三轮复测，排序不变</div>
+        </div>
+      </section>
+
+      <!-- ================= S7 结语 106-120s ================= -->
+      <section id="s7" class="clip" data-start="106" data-duration="14" data-track-index="1">
+        <div class="scene-inner">
+          <div class="outro-lines">
+            <span id="s7-l1" class="outro-line">工程团队<span class="arrow">→</span><span style="color: var(--remotion)">Remotion</span></span>
+            <span id="s7-l2" class="outro-line">Agent 管线<span class="arrow">→</span><span style="color: var(--hyperframes)">HyperFrames</span></span>
+            <span id="s7-l3" class="outro-line">教学演示<span class="arrow">→</span><span style="color: var(--motioncanvas)">Motion Canvas</span></span>
+          </div>
+          <div id="s7-headline" class="outro-headline">没有最好，只有最合适</div>
+          <div id="s7-black" class="blackout"></div>
+        </div>
       </section>
 
       <!-- 旁白音轨，独立音频轨道，原生 <audio> 挂载 -->
@@ -75,8 +670,158 @@
 
     <script>
       window.__timelines = window.__timelines || {};
-      const tl = gsap.timeline({ paused: true });
-      tl.to("#s0-pulse", { opacity: 0.25, duration: 1, repeat: 119, yoyo: true, ease: "sine.inOut" }, 0);
+      const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+      const S1 = 0,
+        S2 = 10,
+        S3 = 24,
+        S4 = 48,
+        S5 = 66,
+        S6 = 90,
+        S7 = 106;
+
+      // ---------------------------------------------------------------
+      // S1 开场 (0-10s)
+      // ---------------------------------------------------------------
+      tl.fromTo("#s1-line", { scaleX: 0 }, { scaleX: 1, duration: 0.8 }, S1 + 0.5);
+      tl.fromTo("#s1-title", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 1.2 }, S1 + 0.8);
+      tl.fromTo("#s1-n-remotion", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, S1 + 2.4);
+      tl.fromTo("#s1-n-hyperframes", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, S1 + 2.7);
+      tl.fromTo("#s1-n-motioncanvas", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, S1 + 3.0);
+      tl.fromTo("#s1-sub", { opacity: 0 }, { opacity: 1, duration: 0.8 }, S1 + 4.8);
+      tl.to("#s1 .scene-inner", { opacity: 0, duration: 0.4 }, S1 + 9.6);
+      tl.set("#s1 .scene-inner", { opacity: 0 }, S1 + 10.0);
+
+      // ---------------------------------------------------------------
+      // S2 实验设定 (10-24s)
+      // ---------------------------------------------------------------
+      tl.fromTo("#s2-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.5 }, S2 + 0.3);
+      tl.fromTo("#s2-no", { opacity: 0 }, { opacity: 1, duration: 0.5 }, S2 + 0.3);
+      tl.fromTo("#s2-title", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5 }, S2 + 0.3);
+      tl.fromTo("#s2-c1", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, S2 + 1.0);
+      tl.fromTo("#s2-c2", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, S2 + 1.4);
+      tl.fromTo("#s2-c3", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, S2 + 1.8);
+      tl.fromTo("#s2-emph", { opacity: 0 }, { opacity: 1, duration: 0.6 }, S2 + 8.0);
+      tl.to("#s2 .scene-inner", { opacity: 0, duration: 0.4 }, S2 + 13.6);
+      tl.set("#s2 .scene-inner", { opacity: 0 }, S2 + 14.0);
+
+      // ---------------------------------------------------------------
+      // S3 渲染性能 (24-48s) — 两拍
+      // ---------------------------------------------------------------
+      tl.fromTo("#s3-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.5 }, S3 + 0.3);
+      tl.fromTo("#s3-no", { opacity: 0 }, { opacity: 1, duration: 0.5 }, S3 + 0.3);
+      tl.fromTo("#s3-title", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5 }, S3 + 0.3);
+
+      // 拍A 渲染耗时 (24-36s)
+      tl.fromTo("#s3a-r .bar-fill", { scaleX: 0 }, { scaleX: 1, duration: 0.8 }, S3 + 0.8);
+      tl.fromTo("#s3a-h .bar-fill", { scaleX: 0 }, { scaleX: 1, duration: 0.8 }, S3 + 1.15);
+      tl.fromTo("#s3a-m .bar-fill", { scaleX: 0 }, { scaleX: 1, duration: 0.8 }, S3 + 1.5);
+      tl.to("#s3a", { opacity: 0, duration: 0.4 }, S3 + 11.6);
+      tl.set("#s3a", { opacity: 0 }, S3 + 12.0);
+
+      // 拍B 产物体积 (36-48s) — container gated hidden (CSS opacity:0) until the handoff
+      tl.set("#s3b", { opacity: 1 }, S3 + 12.0);
+      tl.fromTo("#s3b-sub", { opacity: 0 }, { opacity: 1, duration: 0.5 }, S3 + 12.3);
+      tl.fromTo("#s3b-r .bar-fill", { scaleX: 0 }, { scaleX: 1, duration: 0.8 }, S3 + 12.8);
+      tl.fromTo("#s3b-h .bar-fill", { scaleX: 0 }, { scaleX: 1, duration: 0.8 }, S3 + 13.15);
+      tl.fromTo("#s3b-m .bar-fill", { scaleX: 0 }, { scaleX: 1, duration: 0.8 }, S3 + 13.5);
+      tl.fromTo("#s3b-foot", { opacity: 0 }, { opacity: 1, duration: 0.6 }, S3 + 18.5);
+
+      tl.to("#s3 .scene-inner", { opacity: 0, duration: 0.4 }, S3 + 23.6);
+      tl.set("#s3 .scene-inner", { opacity: 0 }, S3 + 24.0);
+
+      // ---------------------------------------------------------------
+      // S4 代码量 (48-66s)
+      // ---------------------------------------------------------------
+      tl.fromTo("#s4-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.5 }, S4 + 0.3);
+      tl.fromTo("#s4-no", { opacity: 0 }, { opacity: 1, duration: 0.5 }, S4 + 0.3);
+      tl.fromTo("#s4-title", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5 }, S4 + 0.3);
+      tl.fromTo("#s4-r .bar-fill", { scaleX: 0 }, { scaleX: 1, duration: 0.8 }, S4 + 0.8);
+      tl.fromTo("#s4-h .bar-fill", { scaleX: 0 }, { scaleX: 1, duration: 0.8 }, S4 + 1.15);
+      tl.fromTo("#s4-m .bar-fill", { scaleX: 0 }, { scaleX: 1, duration: 0.8 }, S4 + 1.5);
+      tl.fromTo("#s4-highlight", { opacity: 0 }, { opacity: 1, duration: 0.6 }, S4 + 4.5);
+      tl.fromTo("#s4-anno", { opacity: 0 }, { opacity: 1, duration: 0.6 }, S4 + 4.5);
+      tl.to("#s4 .scene-inner", { opacity: 0, duration: 0.4 }, S4 + 17.6);
+      tl.set("#s4 .scene-inner", { opacity: 0 }, S4 + 18.0);
+
+      // ---------------------------------------------------------------
+      // S5 踩坑精选 (66-90s)
+      // ---------------------------------------------------------------
+      tl.fromTo("#s5-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.5 }, S5 + 0.3);
+      tl.fromTo("#s5-no", { opacity: 0 }, { opacity: 1, duration: 0.5 }, S5 + 0.3);
+      tl.fromTo("#s5-title", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5 }, S5 + 0.3);
+      tl.fromTo(
+        "#s5-c1",
+        { rotationX: -70, opacity: 0, transformPerspective: 800 },
+        { rotationX: 0, opacity: 1, duration: 0.8 },
+        S5 + 0.8,
+      );
+      tl.fromTo(
+        "#s5-c2",
+        { rotationX: -70, opacity: 0, transformPerspective: 800 },
+        { rotationX: 0, opacity: 1, duration: 0.8 },
+        S5 + 1.3,
+      );
+      tl.fromTo(
+        "#s5-c3",
+        { rotationX: -70, opacity: 0, transformPerspective: 800 },
+        { rotationX: 0, opacity: 1, duration: 0.8 },
+        S5 + 1.8,
+      );
+      tl.to("#s5 .scene-inner", { opacity: 0, duration: 0.4 }, S5 + 23.6);
+      tl.set("#s5 .scene-inner", { opacity: 0 }, S5 + 24.0);
+
+      // ---------------------------------------------------------------
+      // S6 评分修订 (90-106s)
+      // ---------------------------------------------------------------
+      tl.fromTo("#s6-bar", { scaleY: 0 }, { scaleY: 1, duration: 0.5 }, S6 + 0.3);
+      tl.fromTo("#s6-no", { opacity: 0 }, { opacity: 1, duration: 0.5 }, S6 + 0.3);
+      tl.fromTo("#s6-title", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5 }, S6 + 0.3);
+
+      // 旧值出现 (score/5 * 320px, driven via scaleX on a 320px-wide fill)
+      // .score-group is container-gated hidden (CSS opacity:0) until this handoff
+      tl.set(".score-group", { opacity: 1 }, S6 + 0.8);
+      tl.fromTo("#s6-metric", { opacity: 0 }, { opacity: 1, duration: 0.4 }, S6 + 0.8);
+      tl.fromTo("#s6-row-r .score-fill", { scaleX: 0 }, { scaleX: 0.6, duration: 0.6 }, S6 + 0.8);
+      tl.fromTo("#s6-row-h .score-fill", { scaleX: 0 }, { scaleX: 0.8, duration: 0.6 }, S6 + 0.95);
+      tl.fromTo("#s6-row-m .score-fill", { scaleX: 0 }, { scaleX: 0.8, duration: 0.6 }, S6 + 1.1);
+
+      // 旧值警示：描边闪烁 2 次 + 「与实测矛盾」
+      tl.fromTo(
+        ".score-alert",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.15, repeat: 3, yoyo: true },
+        S6 + 3.0,
+      );
+      tl.fromTo("#s6-note .note-old", { opacity: 0 }, { opacity: 1, duration: 0.4 }, S6 + 3.0);
+
+      // 重排至新值 + 标注切换
+      tl.fromTo("#s6-row-r .score-fill", { scaleX: 0.6 }, { scaleX: 1.0, duration: 0.8 }, S6 + 4.5);
+      tl.fromTo("#s6-row-h .score-fill", { scaleX: 0.8 }, { scaleX: 0.6, duration: 0.8 }, S6 + 4.5);
+      tl.fromTo("#s6-row-m .score-fill", { scaleX: 0.8 }, { scaleX: 0.6, duration: 0.8 }, S6 + 4.5);
+      tl.to("#s6-row-r .sv-old", { opacity: 0, duration: 0.4 }, S6 + 4.5);
+      tl.fromTo("#s6-row-r .sv-new", { opacity: 0 }, { opacity: 1, duration: 0.4 }, S6 + 4.5);
+      tl.to("#s6-row-h .sv-old", { opacity: 0, duration: 0.4 }, S6 + 4.5);
+      tl.fromTo("#s6-row-h .sv-new", { opacity: 0 }, { opacity: 1, duration: 0.4 }, S6 + 4.5);
+      tl.to("#s6-row-m .sv-old", { opacity: 0, duration: 0.4 }, S6 + 4.5);
+      tl.fromTo("#s6-row-m .sv-new", { opacity: 0 }, { opacity: 1, duration: 0.4 }, S6 + 4.5);
+      tl.to("#s6-note .note-old", { opacity: 0, duration: 0.4 }, S6 + 4.5);
+      tl.fromTo("#s6-note .note-new", { opacity: 0 }, { opacity: 1, duration: 0.4 }, S6 + 4.5);
+
+      tl.fromTo("#s6-footer", { opacity: 0 }, { opacity: 1, duration: 0.6 }, S6 + 9.0);
+      tl.to("#s6 .scene-inner", { opacity: 0, duration: 0.4 }, S6 + 15.6);
+      tl.set("#s6 .scene-inner", { opacity: 0 }, S6 + 16.0);
+
+      // ---------------------------------------------------------------
+      // S7 结语 (106-120s)
+      // ---------------------------------------------------------------
+      tl.fromTo("#s7-l1", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, S7 + 0.3);
+      tl.fromTo("#s7-l2", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, S7 + 1.5);
+      tl.fromTo("#s7-l3", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, S7 + 2.7);
+      tl.fromTo("#s7-headline", { opacity: 0 }, { opacity: 1, duration: 0.8 }, S7 + 6.0);
+      tl.fromTo("#s7-black", { opacity: 0 }, { opacity: 1, duration: 0.6 }, S7 + 13.4);
+      tl.set("#s7-black", { opacity: 1 }, S7 + 14.0);
+
       window.__timelines["main"] = tl;
     </script>
   </body>
