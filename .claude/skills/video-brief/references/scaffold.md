@@ -26,7 +26,44 @@ Gate 4 的映射规则。**契约的权威来源是 `hyperframes-core`**，本�
 | §4 预设 tokens | `<style>` 里的 `:root` |
 | §6 旁白 | `<audio>` 元素，`data-track-index` 用一个高值（如 10）与视觉轨分离 |
 
-所有 clip 用 `data-track-index="1"`，除非 BRIEF 明确要求叠加层。
+### 转场重叠映射（交叉转场必须这么算）
+
+以下三条经 `hyperframes@0.7.71 check` 实测确认，缺任何一条都过不了。
+
+交叉转场需要相邻 clip 在时间上重叠 —— 没有重叠就只能淡到底色，那是跳切不是转场。
+
+**① 时间：重叠出转场窗口**
+
+```
+data-start    = 场景表起点（原样，不加不减）
+data-duration = 场景表时长 + 转场时长      ← 末场除外，末场用原时长
+```
+
+**② 轨道：相邻 clip 必须 ping-pong，不能同轨**
+
+`hyperframes check` 把**同轨 clip 重叠判为 error**（`overlapping_clips_same_track`），不是警告。所以奇数场景走 `data-track-index="1"`，偶数场景走 `"2"`，交替下去 —— 这样任意相邻两个 clip 都不同轨，重叠才合法。再给每个 clip 设 `z-index` = 场景序号，让后来的压在上面。
+
+> 只有全片硬切、零重叠时，才可以所有 clip 都留在轨道 1。
+
+**③ 遮挡：必须显式声明有意分层**
+
+转场那 `转场时长` 秒里，淡出 clip 的文字必然被淡入 clip 压住 —— 这是交叉转场的定义，但 Layout 检查会把它报成 `text_occluded`。在每个 clip 上加 `data-layout-allow-occlusion` 声明这是有意的，否则 9 个场景能刷出 20+ 条 info 噪音，把真正的遮挡问题埋掉。
+
+举例（预设 `data-journalism` 转场 0.4s，场景表 6s + 8s）：
+
+| 场景 | data-start | data-duration | data-track-index | 说明 |
+|---|---|---|---|---|
+| 1 | `0` | `6.4` | `1` | 6s 内容 + 0.4s 淡出尾 |
+| 2 | `6` | `8.4` | `2` | 从 6s 起淡入，与场景 1 的尾重叠；换轨道才合法 |
+
+```html
+<section id="s1" class="clip" data-start="0" data-duration="6.4"
+         data-track-index="1" data-layout-allow-occlusion style="z-index: 1">
+```
+
+**根 `data-duration` 仍等于场景表时长之和**（上例 = 14），不含最后一个 clip 之外的尾巴 —— 重叠是内部实现，不延长成片。
+
+验收时「`data-duration` 与场景表逐行对得上」按这条规则核：`data-duration - 转场时长 == 场景表时长`（末场直接相等）。
 
 ## 骨架模板
 
