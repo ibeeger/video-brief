@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>县域咖啡增速解析 — video-brief demo</title>
+    <script src="./vendor/gsap.min.js"></script>
+    <style>
+      /* ── 预设 data-journalism tokens（逐字取自 BRIEF §4）────────────── */
+      :root {
+        --bg:            #0F1115;
+        --bg-elevated:   #171A20;
+        --text-primary:  #F5F5F5;
+        --text-secondary:rgba(245,245,245,0.55);
+        --text-tertiary: rgba(245,245,245,0.36);
+        --accent:        #E4572E;
+        --pos:           #4ADE80;
+        --neg:           #94A3B8;
+        --grid:          rgba(245,245,245,0.08);
+        --axis:          rgba(245,245,245,0.28);
+
+        --font-cn:       'Noto Sans SC', sans-serif;
+        --font-latin:    'Inter', system-ui, sans-serif;
+        --font-mono:     'JetBrains Mono', monospace;
+
+        --title-size:    80px;
+        --title-weight:  700;
+        --title-lh:      1.15;
+        --point-size:    36px;
+        --body-size:     30px;
+        --body-lh:       1.5;
+        --num-size:      148px;
+        --unit-size:     24px;
+
+        --pad-x:         120px;
+        --pad-y:         96px;
+        --gap-s:         16px;
+        --gap-m:         48px;
+        --gap-l:         96px;
+
+        --ease:          power2.out;
+        --dur-in:        0.5s;
+        --dur-count:     1s;
+        --dur-transition:0.4s;
+        --shift:         40px;
+        --stagger:       0.08s;
+
+        --bar-radius:    4px;
+        --line-width:    4px;
+        --dot-size:      10px;
+
+        /* BRIEF §4 新增 token：仅用于场景 1 / 9 的核心数字 */
+        --num-hero:      260px;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px; height: 1080px; overflow: hidden;
+        /* 不透明台底：防转场重叠处露出白闪（seam-craft） */
+        background: #000;
+      }
+      body {
+        font-family: var(--font-cn), var(--font-latin), system-ui, sans-serif;
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+      }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+      .clip { position: absolute; inset: 0; background: var(--bg); }
+
+      /* 等宽数字：count-up 时不抖动 */
+      .num {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum";
+      }
+
+      /* ── 通用版式 ─────────────────────────────────────────────── */
+      .head { position: absolute; left: var(--pad-x); top: var(--pad-y); }
+      .h-title {
+        font-size: var(--title-size); font-weight: var(--title-weight);
+        line-height: var(--title-lh);
+      }
+      .h-sub {
+        margin-top: var(--gap-s);
+        font-size: var(--body-size); line-height: var(--body-lh);
+        color: var(--text-secondary); font-weight: 400;
+      }
+      .point { font-size: var(--point-size); font-weight: 500; }
+      .body { font-size: var(--body-size); line-height: var(--body-lh); }
+      .muted { color: var(--text-secondary); }
+      .dim   { color: var(--text-tertiary); }
+
+      /* 来源标注：每屏右下角（BRIEF §10 品牌合规） */
+      .source {
+        position: absolute; right: var(--pad-x); bottom: var(--pad-y);
+        font-size: var(--unit-size); color: var(--text-tertiary);
+        letter-spacing: 0.04em;
+      }
+
+      .center-stack {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+      }
+      .hero {
+        font-size: var(--num-hero); line-height: 1;
+        font-weight: 700; color: var(--accent);
+      }
+      .hero-cap {
+        margin-top: var(--gap-m);
+        font-size: var(--point-size); color: var(--text-secondary);
+        letter-spacing: 0.08em;
+      }
+
+      /* 柱状图：从基线向上长 */
+      .bar {
+        position: absolute; bottom: 0;
+        border-radius: var(--bar-radius) var(--bar-radius) 0 0;
+        transform-origin: bottom center;
+      }
+      .bar-label {
+        position: absolute; text-align: center;
+        font-size: 34px; font-weight: 500;
+        /* line-height:1 让盒高 == 字号，柱顶留白才算得准（默认 1.2 会把盒底压进柱体） */
+        line-height: 1;
+      }
+      .axis-label {
+        position: absolute; text-align: center;
+        font-size: var(--unit-size); color: var(--text-secondary);
+      }
+      .y-label {
+        position: absolute; text-align: right;
+        font-size: var(--unit-size); color: var(--text-tertiary);
+      }
+
+      /* 归因场景的统计块 */
+      .stat-row {
+        position: absolute; left: var(--pad-x); right: var(--pad-x);
+        top: 400px; display: flex; gap: var(--gap-l); justify-content: center;
+      }
+      .stat {
+        background: var(--bg-elevated);
+        border: 1px solid var(--grid);
+        border-radius: 8px;
+        padding: 48px 64px; min-width: 520px;
+      }
+      .stat-k { font-size: var(--point-size); color: var(--text-secondary); }
+      .stat-v {
+        margin-top: var(--gap-s);
+        font-size: var(--num-size); line-height: 1; font-weight: 700;
+      }
+      .stat-d { margin-top: var(--gap-s); font-size: var(--point-size); font-weight: 500; }
+      .stat-from { font-size: var(--unit-size); color: var(--text-tertiary); }
+
+      svg { position: absolute; inset: 0; }
+      .grid-line { stroke: var(--grid); stroke-width: 1; }
+      .axis-line { stroke: var(--axis); stroke-width: 2; }
+      .series {
+        fill: none; stroke-width: var(--line-width);
+        stroke-linecap: round; stroke-linejoin: round;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-width="1920"
+      data-height="1080"
+      data-duration="51"
+      data-fps="30"
+    >
+      <!-- ══ 场景 1 · 钩子 ══ 表 6s @0s → dur 6.4（含 0.4 转场重叠） ══ -->
+      <section id="s1" class="clip" data-start="0" data-duration="6.4" data-track-index="1" data-layout-allow-occlusion style="z-index: 1">
+        <div class="center-stack">
+          <div id="s1-hero" class="hero num"><span id="s1-num">0.0</span>×</div>
+          <div id="s1-cap" class="hero-cap">下沉市场 vs 一线 · 五年累计增速</div>
+        </div>
+        <div class="source">示例数据 · Demo</div>
+      </section>
+
+      <!-- ══ 场景 2 · 总量铺垫 ══ 表 8s @6s → dur 8.4 ══ -->
+      <section id="s2" class="clip" data-start="6" data-duration="8.4" data-track-index="2" data-layout-allow-occlusion style="z-index: 2">
+        <div class="head">
+          <div class="h-title">市场规模</div>
+          <div class="h-sub">2021 – 2025 · 亿元</div>
+        </div>
+        <div id="s2-cagr" style="position: absolute; left: 120px; top: 470px">
+          <div class="point muted">年复合增速</div>
+          <div class="num" style="margin-top: 16px; font-size: 96px; font-weight: 700; line-height: 1">
+            <span id="s2-cagr-num">0.0</span>%
+          </div>
+          <div class="body dim" style="margin-top: 16px">87 → 342 亿元</div>
+        </div>
+
+        <svg viewBox="0 0 1920 1080" aria-hidden="true">
+          <g id="s2-grid">
+            <line class="grid-line" x1="760" y1="260" x2="1800" y2="260" />
+            <line class="grid-line" x1="760" y1="405" x2="1800" y2="405" />
+            <line class="grid-line" x1="760" y1="550" x2="1800" y2="550" />
+            <line class="grid-line" x1="760" y1="695" x2="1800" y2="695" />
+            <line class="axis-line" x1="760" y1="840" x2="1800" y2="840" />
+          </g>
+        </svg>
+
+        <!-- Y 轴刻度：从 0 起，上限 400（= max 342 × 1.15 上取整到 50 的倍数） -->
+        <div id="s2-y">
+          <div class="y-label" style="left: 640px; top: 246px; width: 100px">400</div>
+          <div class="y-label" style="left: 640px; top: 391px; width: 100px">300</div>
+          <div class="y-label" style="left: 640px; top: 536px; width: 100px">200</div>
+          <div class="y-label" style="left: 640px; top: 681px; width: 100px">100</div>
+          <div class="y-label" style="left: 640px; top: 826px; width: 100px">0</div>
+        </div>
+
+        <!-- 柱：h = value / 400 × 580；前四柱 --neg 灰阶压制，末柱 --text-primary -->
+        <div style="position: absolute; left: 780px; top: 260px; width: 952px; height: 580px">
+          <div class="bar s2-bar" style="left: 0px;   width: 120px; height: 126.2px; background: var(--neg)"></div>
+          <div class="bar s2-bar" style="left: 208px; width: 120px; height: 191.4px; background: var(--neg)"></div>
+          <div class="bar s2-bar" style="left: 416px; width: 120px; height: 287.1px; background: var(--neg)"></div>
+          <div class="bar s2-bar" style="left: 624px; width: 120px; height: 384.3px; background: var(--neg)"></div>
+          <div class="bar s2-bar" style="left: 832px; width: 120px; height: 495.9px; background: var(--text-primary)"></div>
+        </div>
+
+        <div class="bar-label s2-val num" style="left: 780px;  top: 668px; width: 120px">87</div>
+        <div class="bar-label s2-val num" style="left: 988px;  top: 603px; width: 120px">132</div>
+        <div class="bar-label s2-val num" style="left: 1196px; top: 507px; width: 120px">198</div>
+        <div class="bar-label s2-val num" style="left: 1404px; top: 410px; width: 120px">265</div>
+        <div class="bar-label s2-val num" style="left: 1612px; top: 298px; width: 120px">342</div>
+
+        <div class="axis-label num" style="left: 780px;  top: 856px; width: 120px">2021</div>
+        <div class="axis-label num" style="left: 988px;  top: 856px; width: 120px">2022</div>
+        <div class="axis-label num" style="left: 1196px; top: 856px; width: 120px">2023</div>
+        <div class="axis-label num" style="left: 1404px; top: 856px; width: 120px">2024</div>
+        <div class="axis-label num" style="left: 1612px; top: 856px; width: 120px">2025</div>
+
+        <div class="source">示例数据 · Demo · market.json</div>
+      </section>
+
+      <!-- ══ 场景 3 · 分层竞速 ══ 表 8s @14s → dur 8.4 ══ -->
+      <section id="s3" class="clip" data-start="14" data-duration="8.4" data-track-index="1" data-layout-allow-occlusion style="z-index: 3">
+        <div class="head">
+          <div class="h-title">一线 vs 三四线</div>
+          <div class="h-sub">指数化，2021 = 100</div>
+        </div>
+        <div id="s3-legend" style="position: absolute; left: 120px; top: 470px">
+          <div style="display: flex; align-items: center; gap: 16px">
+            <span style="width: 40px; height: 4px; background: var(--accent); display: inline-block"></span>
+            <span class="point">三四线</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 16px; margin-top: 24px">
+            <span style="width: 40px; height: 4px; background: var(--neg); display: inline-block"></span>
+            <span class="point muted">一线</span>
+          </div>
+        </div>
+
+        <svg viewBox="0 0 1920 1080" aria-hidden="true">
+          <g id="s3-grid">
+            <line class="grid-line" x1="760" y1="240" x2="1800" y2="240" />
+            <line class="grid-line" x1="760" y1="390" x2="1800" y2="390" />
+            <line class="grid-line" x1="760" y1="540" x2="1800" y2="540" />
+            <line class="grid-line" x1="760" y1="690" x2="1800" y2="690" />
+            <line class="axis-line" x1="760" y1="840" x2="1800" y2="840" />
+          </g>
+          <!-- 一线：灰阶压制（非主序列） -->
+          <path
+            id="s3-line1"
+            class="series"
+            pathLength="1"
+            stroke="var(--neg)"
+            style="stroke-dasharray: 1; stroke-dashoffset: 0"
+            d="M 780 690 L 1020 663 L 1260 643.5 L 1500 633 L 1740 627"
+          />
+          <!-- 三四线：主序列，强调色（§4 计数第 2 处） -->
+          <path
+            id="s3-line34"
+            class="series"
+            pathLength="1"
+            stroke="var(--accent)"
+            style="stroke-dasharray: 1; stroke-dashoffset: 0"
+            d="M 780 690 L 1020 628.5 L 1260 546 L 1500 438 L 1740 328.5"
+          />
+          <g id="s3-dots">
+            <circle class="s3-dot" cx="780"  cy="690"   r="5" fill="var(--neg)" />
+            <circle class="s3-dot" cx="1020" cy="663"   r="5" fill="var(--neg)" />
+            <circle class="s3-dot" cx="1260" cy="643.5" r="5" fill="var(--neg)" />
+            <circle class="s3-dot" cx="1500" cy="633"   r="5" fill="var(--neg)" />
+            <circle class="s3-dot" cx="1740" cy="627"   r="5" fill="var(--neg)" />
+            <circle class="s3-dot" cx="780"  cy="690"   r="5" fill="var(--accent)" />
+            <circle class="s3-dot" cx="1020" cy="628.5" r="5" fill="var(--accent)" />
+            <circle class="s3-dot" cx="1260" cy="546"   r="5" fill="var(--accent)" />
+            <circle class="s3-dot" cx="1500" cy="438"   r="5" fill="var(--accent)" />
+            <circle class="s3-dot" cx="1740" cy="328.5" r="5" fill="var(--accent)" />
+          </g>
+        </svg>
+
+        <div id="s3-y">
+          <div class="y-label" style="left: 640px; top: 226px; width: 100px">400</div>
+          <div class="y-label" style="left: 640px; top: 376px; width: 100px">300</div>
+          <div class="y-label" style="left: 640px; top: 526px; width: 100px">200</div>
+          <div class="y-label" style="left: 640px; top: 676px; width: 100px">100</div>
+          <div class="y-label" style="left: 640px; top: 826px; width: 100px">0</div>
+        </div>
+
+        <div class="axis-label num" style="left: 720px;  top: 856px; width: 120px">2021</div>
+        <div class="axis-label num" style="left: 960px;  top: 856px; width: 120px">2022</div>
+        <div class="axis-label num" style="left: 1200px; top: 856px; width: 120px">2023</div>
+        <div class="axis-label num" style="left: 1440px; top: 856px; width: 120px">2024</div>
+        <div class="axis-label num" style="left: 1680px; top: 856px; width: 120px">2025</div>
+
+        <div class="source">示例数据 · Demo · tier.json</div>
+      </section>
+
+      <!-- ══ 场景 4 · 竞速结论 ══ 表 6s @22s → dur 6.4 ══
+           坐标轴与两条线几何与场景 3 完全一致，交叉转场后看起来是同一张图不动 -->
+      <section id="s4" class="clip" data-start="22" data-duration="6.4" data-track-index="2" data-layout-allow-occlusion style="z-index: 4">
+        <div class="head">
+          <div class="h-title">五年累计</div>
+          <div class="h-sub">指数化，2021 = 100</div>
+        </div>
+        <div id="s4-ratio" style="position: absolute; left: 120px; top: 440px">
+          <div class="num" style="font-size: var(--num-size); font-weight: 700; line-height: 1">
+            <span id="s4-num">0.0</span>×
+          </div>
+          <div class="point muted" style="margin-top: 24px">下沉市场增速倍数</div>
+          <div class="body dim num" style="margin-top: 16px">341 ÷ 142 = 2.40</div>
+        </div>
+
+        <svg viewBox="0 0 1920 1080" aria-hidden="true">
+          <line class="grid-line" x1="760" y1="240" x2="1800" y2="240" />
+          <line class="grid-line" x1="760" y1="390" x2="1800" y2="390" />
+          <line class="grid-line" x1="760" y1="540" x2="1800" y2="540" />
+          <line class="grid-line" x1="760" y1="690" x2="1800" y2="690" />
+          <line class="axis-line" x1="760" y1="840" x2="1800" y2="840" />
+          <path class="series" stroke="var(--neg)"
+                d="M 780 690 L 1020 663 L 1260 643.5 L 1500 633 L 1740 627" />
+          <path class="series" stroke="var(--accent)"
+                d="M 780 690 L 1020 628.5 L 1260 546 L 1500 438 L 1740 328.5" />
+          <circle cx="1740" cy="627"   r="7" fill="var(--neg)" />
+          <circle cx="1740" cy="328.5" r="7" fill="var(--accent)" />
+        </svg>
+
+        <!-- 坐标轴刻度：与场景 3 逐像素一致，交叉转场后看起来完全没动 -->
+        <div id="s4-y">
+          <div class="y-label" style="left: 640px; top: 226px; width: 100px">400</div>
+          <div class="y-label" style="left: 640px; top: 376px; width: 100px">300</div>
+          <div class="y-label" style="left: 640px; top: 526px; width: 100px">200</div>
+          <div class="y-label" style="left: 640px; top: 676px; width: 100px">100</div>
+          <div class="y-label" style="left: 640px; top: 826px; width: 100px">0</div>
+        </div>
+        <div class="axis-label num" style="left: 720px;  top: 856px; width: 120px">2021</div>
+        <div class="axis-label num" style="left: 960px;  top: 856px; width: 120px">2022</div>
+        <div class="axis-label num" style="left: 1200px; top: 856px; width: 120px">2023</div>
+        <div class="axis-label num" style="left: 1440px; top: 856px; width: 120px">2024</div>
+        <div class="axis-label num" style="left: 1680px; top: 856px; width: 120px">2025</div>
+
+        <!-- 末端标注：右对齐到 x=1800（= 1920 − pad-x 120），不越安全边距 -->
+        <div id="s4-tag34" class="num" style="position: absolute; left: 1620px; top: 248px; width: 180px; text-align: right; font-size: 56px; font-weight: 700; color: var(--accent)">341</div>
+        <div id="s4-tag1"  class="num" style="position: absolute; left: 1620px; top: 654px; width: 180px; text-align: right; font-size: 56px; font-weight: 700; color: var(--neg)">142</div>
+
+        <div class="source">示例数据 · Demo · tier.json</div>
+      </section>
+
+      <!-- ══ 场景 5 · 归因① 门店密度 ══ 表 4s @28s → dur 4.4 ══ -->
+      <section id="s5" class="clip" data-start="28" data-duration="4.4" data-track-index="1" data-layout-allow-occlusion style="z-index: 5">
+        <div class="head">
+          <div class="h-title">① 门店密度还有空间</div>
+          <div class="h-sub">2025 · 店 / 万人</div>
+        </div>
+
+        <svg viewBox="0 0 1920 1080" aria-hidden="true">
+          <line class="grid-line" x1="1000" y1="380" x2="1760" y2="380" />
+          <line class="grid-line" x1="1000" y1="513" x2="1760" y2="513" />
+          <line class="grid-line" x1="1000" y1="646" x2="1760" y2="646" />
+          <line class="axis-line" x1="1000" y1="780" x2="1760" y2="780" />
+        </svg>
+
+        <!-- h = value / 15 × 400；一线主序列用 --text-primary，三四线用 --neg -->
+        <div style="position: absolute; left: 1080px; top: 380px; width: 600px; height: 400px">
+          <div class="bar s5-bar" style="left: 40px;  width: 160px; height: 330.7px; background: var(--text-primary)"></div>
+          <div class="bar s5-bar" style="left: 360px; width: 160px; height: 82.7px;  background: var(--neg)"></div>
+        </div>
+
+        <div class="bar-label s5-val num" style="left: 1120px; top: 383px; width: 160px; font-size: 52px; font-weight: 700">
+          <span id="s5-v1">0.0</span>
+        </div>
+        <div class="bar-label s5-val num" style="left: 1440px; top: 631px; width: 160px; font-size: 52px; font-weight: 700">
+          <span id="s5-v2">0.0</span>
+        </div>
+        <div id="s5-y">
+          <div class="y-label" style="left: 900px; top: 366px; width: 80px">15</div>
+          <div class="y-label" style="left: 900px; top: 499px; width: 80px">10</div>
+          <div class="y-label" style="left: 900px; top: 632px; width: 80px">5</div>
+          <div class="y-label" style="left: 900px; top: 766px; width: 80px">0</div>
+        </div>
+        <div class="axis-label" style="left: 1120px; top: 796px; width: 160px">一线</div>
+        <div class="axis-label" style="left: 1440px; top: 796px; width: 160px">三四线</div>
+
+        <div id="s5-cap" class="point muted" style="position: absolute; left: 120px; top: 520px; width: 720px; line-height: 1.5">
+          三四线密度仅为一线的 <span class="num" style="color: var(--text-primary)">25%</span>，<br />开店空间尚未见顶
+        </div>
+
+        <div class="source">示例数据 · Demo · factors.json</div>
+      </section>
+
+      <!-- ══ 场景 6 · 归因② 客单价与订单数 ══ 表 4s @32s → dur 4.4 ══ -->
+      <section id="s6" class="clip" data-start="32" data-duration="4.4" data-track-index="2" data-layout-allow-occlusion style="z-index: 6">
+        <div class="head">
+          <div class="h-title">② 客单价降，订单翻倍</div>
+          <div class="h-sub">三四线 · 2021 → 2025</div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat s6-card">
+            <div class="stat-k">客单价</div>
+            <div class="stat-v num">¥<span id="s6-ticket">28.6</span></div>
+            <div class="stat-from num">2021 ¥28.6</div>
+            <!-- 负向用中性灰 --neg，不用红（预设禁止清单） -->
+            <div class="stat-d num" style="color: var(--neg)">▼ 43.4%</div>
+          </div>
+          <div class="stat s6-card">
+            <div class="stat-k">订单数（指数）</div>
+            <div class="stat-v num"><span id="s6-orders">100</span></div>
+            <div class="stat-from num">2021 = 100</div>
+            <div class="stat-d num" style="color: var(--pos)">▲ 114%</div>
+          </div>
+        </div>
+
+        <div class="source">示例数据 · Demo · factors.json</div>
+      </section>
+
+      <!-- ══ 场景 7 · 归因③ 外卖渗透 ══ 表 4s @36s → dur 4.4 ══ -->
+      <section id="s7" class="clip" data-start="36" data-duration="4.4" data-track-index="1" data-layout-allow-occlusion style="z-index: 7">
+        <div class="head">
+          <div class="h-title">③ 外卖渗透升到近四成</div>
+          <div class="h-sub">三四线 · 门店订单中外卖占比</div>
+        </div>
+
+        <svg viewBox="0 0 1920 1080" aria-hidden="true">
+          <!-- 环形轨道 -->
+          <circle cx="1360" cy="560" r="180" fill="none" stroke="var(--grid)" stroke-width="28" />
+          <!-- 进度环：静态 rotate(-90) 把起点摆到 12 点，再顺时针扫。
+               这是静态坐标变换，不是动效旋转 —— 预设禁的是动效旋转 -->
+          <circle
+            id="s7-ring"
+            cx="1360" cy="560" r="180"
+            fill="none" stroke="var(--accent)" stroke-width="28" stroke-linecap="butt"
+            pathLength="1"
+            style="stroke-dasharray: 1; stroke-dashoffset: 0.62"
+            transform="rotate(-90 1360 560)"
+          />
+        </svg>
+
+        <div id="s7-pctbox" class="num" style="position: absolute; left: 1160px; top: 494px; width: 400px; text-align: center; font-size: 120px; font-weight: 700; line-height: 1">
+          <span id="s7-pct">0</span>%
+        </div>
+
+        <div id="s7-side" style="position: absolute; left: 120px; top: 480px">
+          <div class="body muted">2021</div>
+          <div class="num" style="font-size: 72px; font-weight: 700; color: var(--neg); line-height: 1.1">11%</div>
+          <div class="body muted" style="margin-top: 32px">2025</div>
+          <div class="num" style="font-size: 72px; font-weight: 700; line-height: 1.1">38%</div>
+          <div class="point muted" style="margin-top: 32px">四年提升 <span class="num">3.5</span> 倍</div>
+        </div>
+
+        <div class="source">示例数据 · Demo · factors.json</div>
+      </section>
+
+      <!-- ══ 场景 8 · 反转 ══ 表 5s @40s → dur 5.4 ══ -->
+      <section id="s8" class="clip" data-start="40" data-duration="5.4" data-track-index="2" data-layout-allow-occlusion style="z-index: 8">
+        <div class="head">
+          <div class="h-title">但单店月营收在下滑</div>
+          <div class="h-sub">三四线 · 万元 / 店 / 月 · Y 轴自 0 起，未截断</div>
+        </div>
+
+        <svg viewBox="0 0 1920 1080" aria-hidden="true">
+          <line class="grid-line" x1="760" y1="380" x2="1800" y2="380" />
+          <line class="grid-line" x1="760" y1="468" x2="1800" y2="468" />
+          <line class="grid-line" x1="760" y1="556" x2="1800" y2="556" />
+          <line class="grid-line" x1="760" y1="644" x2="1800" y2="644" />
+          <line class="grid-line" x1="760" y1="732" x2="1800" y2="732" />
+          <line class="axis-line" x1="760" y1="820" x2="1800" y2="820" />
+          <!-- 下滑序列用中性灰 --neg，不用红 -->
+          <path
+            id="s8-line"
+            class="series"
+            pathLength="1"
+            stroke="var(--neg)"
+            style="stroke-dasharray: 1; stroke-dashoffset: 0"
+            d="M 780 436.3 L 1020 448.6 L 1260 475 L 1500 496.2 L 1740 515.5"
+          />
+          <g id="s8-dots">
+            <circle class="s8-dot" cx="780"  cy="436.3" r="6" fill="var(--neg)" />
+            <circle class="s8-dot" cx="1020" cy="448.6" r="6" fill="var(--neg)" />
+            <circle class="s8-dot" cx="1260" cy="475"   r="6" fill="var(--neg)" />
+            <circle class="s8-dot" cx="1500" cy="496.2" r="6" fill="var(--neg)" />
+            <circle class="s8-dot" cx="1740" cy="515.5" r="6" fill="var(--neg)" />
+          </g>
+        </svg>
+
+        <div>
+          <div class="y-label" style="left: 640px; top: 366px; width: 100px">25</div>
+          <div class="y-label" style="left: 640px; top: 454px; width: 100px">20</div>
+          <div class="y-label" style="left: 640px; top: 542px; width: 100px">15</div>
+          <div class="y-label" style="left: 640px; top: 630px; width: 100px">10</div>
+          <div class="y-label" style="left: 640px; top: 718px; width: 100px">5</div>
+          <div class="y-label" style="left: 640px; top: 806px; width: 100px">0</div>
+        </div>
+
+        <div class="axis-label num" style="left: 720px;  top: 838px; width: 120px">2021</div>
+        <div class="axis-label num" style="left: 960px;  top: 838px; width: 120px">2022</div>
+        <div class="axis-label num" style="left: 1200px; top: 838px; width: 120px">2023</div>
+        <div class="axis-label num" style="left: 1440px; top: 838px; width: 120px">2024</div>
+        <div class="axis-label num" style="left: 1680px; top: 838px; width: 120px">2025</div>
+
+        <div id="s8-callout" style="position: absolute; left: 120px; top: 440px">
+          <div class="num" style="font-size: 96px; font-weight: 700; color: var(--neg); line-height: 1">−20.6%</div>
+          <div class="point muted" style="margin-top: 24px">21.8 → 17.3 万元</div>
+          <div class="body dim" style="margin-top: 16px">总量在涨，单店在退</div>
+        </div>
+
+        <div class="source">示例数据 · Demo · factors.json</div>
+      </section>
+
+      <!-- ══ 场景 9 · 结论 + CTA ══ 表 6s @45s → dur 6.0（末场不加重叠）══ -->
+      <section id="s9" class="clip" data-start="45" data-duration="6" data-track-index="1" data-layout-allow-occlusion style="z-index: 9">
+        <div class="center-stack">
+          <div id="s9-hero" class="hero num"><span id="s9-num">0.0</span>×</div>
+          <div id="s9-line" class="point" style="margin-top: 48px; font-size: 48px; font-weight: 500">
+            增速是总量的故事，单店才是生意的故事
+          </div>
+          <div id="s9-disc" class="body dim" style="margin-top: 48px">
+            全片数据为合成示例，不代表真实市场
+          </div>
+          <div id="s9-cta" class="body muted" style="margin-top: 16px; letter-spacing: 0.12em">
+            数据看行业 · 订阅
+          </div>
+        </div>
+        <div class="source">示例数据 · Demo</div>
+      </section>
+
+      <audio
+        id="voiceover"
+        src="assets/voiceover-demo.mp3"
+        data-start="0"
+        data-duration="51"
+        data-track-index="10"
+      ></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const EASE = "power2.out";
+
+      /* count-up：seek-safe —— gsap 在每次 render（含 seek）都会跑 onUpdate */
+      function countUp(sel, from, to, dp, at, dur) {
+        const el = document.querySelector(sel);
+        const o = { v: from };
+        el.textContent = from.toFixed(dp);
+        tl.to(
+          o,
+          {
+            v: to,
+            duration: dur,
+            ease: EASE,
+            onUpdate() { el.textContent = o.v.toFixed(dp); },
+          },
+          at
+        );
+      }
+
+      /* 交叉转场：0.4s 模糊叠化。相邻 clip 有 0.4s 重叠，
+         前一个在重叠段淡出，后一个同步淡入 —— 见 scaffold.md「转场重叠映射」 */
+      const T = 0.4;
+      function fadeIn(sel, at) {
+        tl.fromTo(sel, { opacity: 0, filter: "blur(12px)" },
+                       { opacity: 1, filter: "blur(0px)", duration: T, ease: EASE }, at);
+      }
+      function fadeOut(sel, at) {
+        tl.to(sel, { opacity: 0, filter: "blur(12px)", duration: T, ease: EASE }, at);
+      }
+
+      /* 场景边界（BRIEF §5）：起点 / 内容结束点 */
+      const S = [
+        { el: "#s1", in: 0,  out: 6  },
+        { el: "#s2", in: 6,  out: 14 },
+        { el: "#s3", in: 14, out: 22 },
+        { el: "#s4", in: 22, out: 28 },
+        { el: "#s5", in: 28, out: 32 },
+        { el: "#s6", in: 32, out: 36 },
+        { el: "#s7", in: 36, out: 40 },
+        { el: "#s8", in: 40, out: 45 },
+        { el: "#s9", in: 45, out: null },
+      ];
+      S.forEach((s, i) => {
+        if (i > 0) fadeIn(s.el, s.in);        // 场景 1 直接可见（其内容另有 0.5s 黑场）
+        if (s.out !== null) fadeOut(s.el, s.out);
+      });
+
+      /* ── 场景 1 · 钩子（0.5s 黑场后数字 count-up）─────────────── */
+      tl.fromTo("#s1-hero", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: EASE }, 0.5);
+      countUp("#s1-num", 0, 2.4, 1, 0.5, 1.2);
+      tl.from("#s1-cap", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 1.5);
+
+      /* ── 场景 2 · 五年规模柱状 ───────────────────────────────── */
+      tl.from("#s2 .head", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 6.05);
+      tl.from("#s2-grid line", { opacity: 0, duration: 0.4, ease: EASE, stagger: 0.04 }, 6.15);
+      tl.from("#s2-y .y-label", { opacity: 0, duration: 0.4, ease: EASE, stagger: 0.04 }, 6.15);
+      /* 柱从基线向上长（transform-origin: bottom center 在 CSS 里） */
+      tl.from(".s2-bar", { scaleY: 0, duration: 0.5, ease: EASE, stagger: 0.08 }, 6.55);
+      tl.from(".s2-val", { opacity: 0, y: 20, duration: 0.4, ease: EASE, stagger: 0.08 }, 6.85);
+      tl.from("#s2 .axis-label", { opacity: 0, duration: 0.4, ease: EASE, stagger: 0.06 }, 6.55);
+      tl.from("#s2-cagr", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 6.21);
+      countUp("#s2-cagr-num", 0, 40.8, 1, 6.21, 1.0);
+
+      /* ── 场景 3 · 双折线竞速（从左向右画）───────────────────── */
+      tl.from("#s3 .head", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 14.05);
+      tl.from("#s3-grid line", { opacity: 0, duration: 0.4, ease: EASE, stagger: 0.04 }, 14.15);
+      tl.from("#s3-y .y-label", { opacity: 0, duration: 0.4, ease: EASE, stagger: 0.04 }, 14.15);
+      tl.from("#s3 .axis-label", { opacity: 0, duration: 0.4, ease: EASE, stagger: 0.06 }, 14.25);
+      tl.from("#s3-legend", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 14.45);
+      /* pathLength="1" → dashoffset 1→0 就是精确的「画一遍」 */
+      tl.from("#s3-line1",  { strokeDashoffset: 1, duration: 1.8, ease: "none" }, 14.55);
+      tl.from("#s3-line34", { strokeDashoffset: 1, duration: 2.2, ease: "none" }, 14.75);
+      tl.from(".s3-dot", { opacity: 0, duration: 0.3, ease: EASE, stagger: 0.09 }, 14.95);
+
+      /* ── 场景 4 · 竞速结论标注 ───────────────────────────────── */
+      tl.from("#s4 .head", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 22.05);
+      tl.from("#s4-tag34", { opacity: 0, x: -30, duration: 0.5, ease: EASE }, 22.25);
+      tl.from("#s4-tag1",  { opacity: 0, x: -30, duration: 0.5, ease: EASE }, 22.4);
+      tl.from("#s4-ratio", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 22.55);
+      countUp("#s4-num", 0, 2.4, 1, 22.65, 1.0);
+
+      /* ── 场景 5 · 门店密度 ───────────────────────────────────── */
+      tl.from("#s5 .head", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 28.05);
+      tl.from(".s5-bar", { scaleY: 0, duration: 0.5, ease: EASE, stagger: 0.08 }, 28.45);
+      tl.from(".s5-val", { opacity: 0, duration: 0.4, ease: EASE, stagger: 0.08 }, 28.75);
+      countUp("#s5-v1", 0, 12.4, 1, 28.45, 0.8);
+      countUp("#s5-v2", 0, 3.1, 1, 28.53, 0.8);
+      tl.from("#s5 .axis-label", { opacity: 0, duration: 0.4, ease: EASE, stagger: 0.06 }, 28.45);
+      tl.from("#s5-cap", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 28.95);
+
+      /* ── 场景 6 · 客单价与订单数 ─────────────────────────────── */
+      tl.from("#s6 .head", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 32.05);
+      tl.from(".s6-card", { opacity: 0, y: 40, duration: 0.5, ease: EASE, stagger: 0.08 }, 32.4);
+      countUp("#s6-ticket", 28.6, 16.2, 1, 32.65, 1.0);
+      countUp("#s6-orders", 100, 214, 0, 32.65, 1.0);
+
+      /* ── 场景 7 · 外卖渗透环形 ───────────────────────────────── */
+      tl.from("#s7 .head", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 36.05);
+      /* 从 12 点顺时针扫到 38%：dashoffset 1 → 0.62 */
+      tl.from("#s7-ring", { strokeDashoffset: 1, duration: 1.2, ease: EASE }, 36.45);
+      tl.from("#s7-pctbox", { opacity: 0, duration: 0.3, ease: EASE }, 36.45);
+      countUp("#s7-pct", 0, 38, 0, 36.45, 1.2);
+      tl.from("#s7-side", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 36.65);
+
+      /* ── 场景 8 · 反转 ───────────────────────────────────────── */
+      tl.from("#s8 .head", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 40.05);
+      tl.from("#s8 .y-label", { opacity: 0, duration: 0.4, ease: EASE, stagger: 0.04 }, 40.15);
+      tl.from("#s8 .axis-label", { opacity: 0, duration: 0.4, ease: EASE, stagger: 0.06 }, 40.25);
+      tl.from("#s8-line", { strokeDashoffset: 1, duration: 1.6, ease: "none" }, 40.55);
+      tl.from(".s8-dot", { opacity: 0, duration: 0.3, ease: EASE, stagger: 0.08 }, 40.85);
+      tl.from("#s8-callout", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 41.55);
+
+      /* ── 场景 9 · 结论 + CTA ─────────────────────────────────── */
+      tl.fromTo("#s9-hero", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: EASE }, 45.05);
+      countUp("#s9-num", 0, 2.4, 1, 45.05, 1.0);
+      tl.from("#s9-line", { opacity: 0, y: 40, duration: 0.5, ease: EASE }, 45.95);
+      tl.from("#s9-disc", { opacity: 0, duration: 0.5, ease: EASE }, 46.45);
+      tl.from("#s9-cta",  { opacity: 0, duration: 0.5, ease: EASE }, 46.75);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

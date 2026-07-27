@@ -1,0 +1,13 @@
+{
+  "_note": "合成的示例数据，不代表任何真实市场。Synthetic demo data.",
+  "base_year": 2021,
+  "base_index": 100,
+  "ratio_2025": 2.4,
+  "series": [
+    { "year": 2021, "tier1_index": 100, "tier34_index": 100 },
+    { "year": 2022, "tier1_index": 118, "tier34_index": 141 },
+    { "year": 2023, "tier1_index": 131, "tier34_index": 196 },
+    { "year": 2024, "tier1_index": 138, "tier34_index": 268 },
+    { "year": 2025, "tier1_index": 142, "tier34_index": 341 }
+  ]
+}

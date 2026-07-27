@@ -1,0 +1,35 @@
+{
+  "_note": "合成的示例数据，不代表任何真实市场。Synthetic demo data.",
+  "density": {
+    "label": "门店密度",
+    "unit": "店/万人",
+    "tier1": 12.4,
+    "tier34": 3.1
+  },
+  "ticket": {
+    "label": "客单价与订单数（三四线）",
+    "ticket_2021": 28.6,
+    "ticket_2025": 16.2,
+    "ticket_delta_pct": -43.4,
+    "orders_index_2021": 100,
+    "orders_index_2025": 214,
+    "orders_delta_pct": 114
+  },
+  "delivery": {
+    "label": "外卖渗透率（三四线）",
+    "from_pct": 11,
+    "to_pct": 38
+  },
+  "reversal": {
+    "label": "单店月营收（三四线）",
+    "unit": "万元",
+    "series": [
+      { "year": 2021, "value": 21.8 },
+      { "year": 2022, "value": 21.1 },
+      { "year": 2023, "value": 19.6 },
+      { "year": 2024, "value": 18.4 },
+      { "year": 2025, "value": 17.3 }
+    ],
+    "delta_pct": -20.6
+  }
+}
