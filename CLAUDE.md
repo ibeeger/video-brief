@@ -3,14 +3,16 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## 项目
-三框架（Remotion / HyperFrames / Motion Canvas）实现同一支 30s 对比视频。
-唯一内容依据：docs/storyboard.md。规格：1920×1080·30fps·30s·含旁白音轨。
+HyperFrames 视频生成基础环境。唯一出片框架是 HyperFrames——新视频一律用它，
+不再引入 Remotion / Motion Canvas 等其它框架。
+
+现有两支成片项目：`hyperframes/`（30s 框架对比片，内容依据 docs/storyboard.md）、
+`hyperframes-report/`（报告讲解片，内容依据 docs/storyboard-report.md）。
+规格：1920×1080·30fps·含旁白音轨。
 
 ## 常用命令
 - 首次初始化（fresh clone 前置）：`python3 -m venv .venv && .venv/bin/pip install edge-tts`
 - 旁白生成：`bash scripts/build-voiceover.sh`（产出 assets/voiceover.mp3，依赖上一步的 .venv/bin/edge-tts）
-- Remotion 预览：`cd remotion && npx remotion studio`
-- Remotion 渲染：`cd remotion && npx remotion render src/index.ts Compare ../output/remotion.mp4`
 - HyperFrames 预览：`cd hyperframes && npx --yes hyperframes@0.7.71 preview`
 - HyperFrames 校验：`cd hyperframes && npx --yes hyperframes@0.7.71 check`
 - HyperFrames 渲染：`cd hyperframes && npx --yes hyperframes@0.7.71 render --quality high --output ../output/hyperframes.mp4`
@@ -19,16 +21,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   避免 `init`/`skills` 向 home 目录写入全局 skills，详见 docs/report.md 附录「踩坑实录」）
 - 报告视频旁白：`bash scripts/build-voiceover-report.sh`（产出 assets/voiceover-report.mp3）
 - 报告讲解视频渲染：`cd hyperframes-report && npx --yes hyperframes@0.7.71 render --quality high --output ../output/report-video.mp4`
-- Motion Canvas 编辑器：`cd motion-canvas && npm start`
-- Motion Canvas 渲染：`node scripts/render-motion-canvas.mjs`（产出 `output/motion-canvas.mp4`）
-  （**非一等 CLI**：Motion Canvas 3.17.2 无官方 headless 渲染入口，本脚本用 puppeteer-core
-  驱动系统 Chrome 打开 `motion-canvas/render.html`，在浏览器上下文里直接调用
-  `@motion-canvas/core` 的 `Renderer` API + `@motion-canvas/ffmpeg` 导出链路——是「可编程渲染」
-  而非模拟点击编辑器 UI 按钮；音频为原生混流（FFmpegExporterServer 直接接收
-  `assets/voiceover.mp3`）。首次渲染前脚本会自动跑一次极短「预热」渲染，
-  规避 vite optimizeDeps 首次发现依赖时的强制刷新把正式渲染冲断的问题；
-  详见 docs/report.md 附录「踩坑实录」）
-- 基准测试：`node scripts/benchmark.mjs`
 
 ## 新开一支视频
 先走 `/video-brief`（project skill，`.claude/skills/video-brief/`）：它把需求逼成可执行 `BRIEF.md`
@@ -38,6 +30,12 @@ vertical-feed）、再生成 HyperFrames 项目骨架，然后交棒给 hyperfra
 
 ## 约束
 - 所有权限/skills 只放项目 .claude/，不写 home 目录；Python 用项目 .venv/。
-- 三实现的文案、时间轴、色板必须与 docs/storyboard.md 完全一致。
+- 出片框架只用 HyperFrames。不要再往仓库里加 Remotion / Motion Canvas 等其它框架的项目或渲染脚本。
 - `.claude/skills/` 下除 `video-brief` 外均由 `skills-lock.json` 从上游 heygen-com/hyperframes 管理。
   自建 skill 不得写入 lock，否则 `hyperframes skills` 升级会冲掉它。
+  （`remotion-to-hyperframes` 是上游提供的 Remotion→HyperFrames 单向移植 skill，属 HyperFrames 能力，保留。）
+
+## 历史存档
+`docs/report.md`、`docs/storyboard.md`、`docs/superpowers/{plans,specs}/2026-07-25-*` 与
+`output/benchmark.json` 记录的是 2026-07 三框架对比实验。实验已结束，Remotion / Motion Canvas
+的代码与渲染脚本已从仓库移除，这些文档仅作历史存档，不再对应可运行的代码。

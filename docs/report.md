@@ -1,5 +1,10 @@
 # Remotion vs HyperFrames vs Motion Canvas 实测对比报告
 
+> **历史存档（2026-07-27 起）**：本仓库已收敛为 HyperFrames 单框架环境，`remotion/`、
+> `motion-canvas/`、`scripts/render-motion-canvas.mjs`、`scripts/benchmark.mjs` 均已移除。
+> 本文所述命令与代码行数对应实验当时的仓库状态，现已不可直接复现；保留仅为记录实测结论。
+> 原始测量数据仍在 `output/benchmark.json`。
+
 数据来源：`output/benchmark.json`（三框架各 3 次冷启动渲染实测）、`wc -l` 代码行数实测、
 `.superpowers/sdd/2026-07-25-video-framework-comparison/task-4..8-report.md` 开发过程实录、
 三支成片 `ffprobe`/截帧人工核对。全部数据均来自实测，不凭空给结论。
